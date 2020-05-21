@@ -14,6 +14,7 @@ if(!fs.existsSync(WRITE_DIR)) {
 }
 
 let converter = new Converter({
+    customizedHeaderId: true,
     parseImgDimensions: true
 });
 
@@ -32,7 +33,7 @@ for(let file of files) {
     let name = path.basename(file).replace(/.md$/, '');
     let target = path.join(WRITE_DIR, name + '.html');
 
-    let [_, date, title, image] = data.match(/\[([0-9\-]+)\]::.*# (.*?)\n.*!\[.*\]\((.*)\)/s);
+    let [_, title, date, image] = data.match(/# (.*?)\n.*## ([0-9\-]+)\n.*!\[.*\]\((.*)\)/s);
     posts.push({
         name: name,
         title: title,
@@ -63,18 +64,17 @@ for(let file of files) {
 
 // Main page
 if(changed) {
-    let content = `
-# Rio's Blog
-`
+    let content = "";
 
     for(let post of posts.reverse()) { // File with bigger filename comes first
         content += `
-<a href="${post.name + '.html'}">
-## ${post.title}
-<span class=date>${post.date}</span>
-
-![image](${post.image})
-</a>
+<div class="post">
+    <a href="${post.name + '.html'}">
+        <h1>${post.title}</h1>
+        <h2>${post.date}</h2>
+        <img src="${post.image}" />
+    </a>
+</div>
     `;
     }
 
