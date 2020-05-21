@@ -1,0 +1,18 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "description": "My blog",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "nodemon -e .md -w src -x 'npm run build'"
+  },
+  "author": "Rio6",
+  "dependencies": {
+    "glob": "^7.1.6",
+    "plates": "^0.4.11",
+    "showdown": "^1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
