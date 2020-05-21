@@ -9,8 +9,7 @@ const READ_DIR = './blog';
 const WRITE_DIR = './dist';
 const TEMPLATE = './template.html';
 
-if(fs.existsSync(WRITE_DIR)) {
-} else {
+if(!fs.existsSync(WRITE_DIR)) {
     fs.mkdirSync(WRITE_DIR);
 }
 
@@ -19,6 +18,9 @@ let converter = new Converter({
 });
 
 let template = fs.readFileSync(TEMPLATE, 'utf-8');
+let tempStat = fs.statSync(TEMPLATE);
+let progStat = fs.statSync(process.argv[1]);
+
 let posts = [];
 let changed = false;
 
@@ -41,7 +43,7 @@ for(let file of files) {
     let fstat = fs.existsSync(file) && fs.statSync(file) || {};
     let tstat = fs.existsSync(target) && fs.statSync(target) || {};
 
-    if(fstat.mtime < tstat.mtime) {
+    if(Math.max(fstat.mtime, tempStat.mtime, progStat.mtime) < tstat.mtime) {
         console.log("skip", file);
         continue;
     }
@@ -55,7 +57,7 @@ for(let file of files) {
 
     fs.writeFile(target, html, err => {
         if(err) throw(err);
-        console.log(file, "=>", target);
+        console.log(file, "->", target);
     });
 }
 
@@ -83,6 +85,6 @@ if(changed) {
     let target = path.join(WRITE_DIR, 'index.html');
     fs.writeFile(target, html, err => {
         if(err) throw(err);
-        console.log("index =>", target);
+        console.log("index ->", target);
     });
 } else console.log("skip index");

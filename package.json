@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "My blog",
   "scripts": {
-    "build": "node build.js",
+    "clean": "rm -r dist/",
+    "build": "node build.js && cp -uv res/* dist/",
     "watch": "nodemon -e .md -w src -x 'npm run build'"
   },
   "author": "Rio6",
