@@ -15,7 +15,8 @@ if(!fs.existsSync(WRITE_DIR)) {
 
 let converter = new Converter({
     customizedHeaderId: true,
-    parseImgDimensions: true
+    parseImgDimensions: true,
+    tables: true
 });
 
 let template = fs.readFileSync(TEMPLATE, 'utf-8');
