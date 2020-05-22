@@ -2,8 +2,9 @@ var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
 
-var {Converter} = require('showdown');
+var showdown = require('showdown');
 var plates = require('plates');
+require('showdown-highlightjs-extension');
 
 const READ_DIR = './blog';
 const WRITE_DIR = './dist';
@@ -13,10 +14,12 @@ if(!fs.existsSync(WRITE_DIR)) {
     fs.mkdirSync(WRITE_DIR);
 }
 
-let converter = new Converter({
+let converter = new showdown.Converter({
     customizedHeaderId: true,
     parseImgDimensions: true,
-    tables: true
+    openLinksInNewWindow: true,
+    tables: true,
+    extensions: ['highlightjs']
 });
 
 let template = fs.readFileSync(TEMPLATE, 'utf-8');
@@ -34,7 +37,9 @@ for(let file of files) {
     let name = path.basename(file).replace(/.md$/, '');
     let target = path.join(WRITE_DIR, name + '.html');
 
-    let [_, title, date, image] = data.match(/# (.*?)\n.*## ([0-9\-]+)\n.*!\[.*\]\((.*)\)/s);
+    let match = data.match(/# (.*?)\n.*## (.+?)\n([^!]|\![^\[])*(!\[.*?\]\((\S+).*?\))*/s);
+    let title = match[1], date = match[2], image = match[5];
+
     posts.push({
         name: name,
         title: title,
@@ -73,7 +78,7 @@ if(changed) {
     <a href="${post.name + '.html'}">
         <h1>${post.title}</h1>
         <h2>${post.date}</h2>
-        <img src="${post.image}" />
+        ${post.image && `<img src="${post.image}" />` || ''}
     </a>
 </div>
     `;
@@ -83,6 +88,7 @@ if(changed) {
         title: "Rio's Blog",
         content: converter.makeHtml(content)
     });
+
     let target = path.join(WRITE_DIR, 'index.html');
     fs.writeFile(target, html, err => {
         if(err) throw(err);

@@ -4,14 +4,16 @@
   "description": "My blog",
   "scripts": {
     "clean": "rm -r dist/",
-    "build": "node build.js && cp -uv res/* dist/",
-    "watch": "nodemon -e 'md css html' -w blog -w res -w . -x 'npm run build'"
+    "build": "node build.js && cp -ruv res/* dist/",
+    "watch": "nodemon -e 'md css html js' -w . -i dist -x 'npm run build'"
   },
   "author": "Rio6",
   "dependencies": {
     "glob": "^7.1.6",
+    "highlight.js": "^10.0.3",
     "plates": "^0.4.11",
-    "showdown": "^1.9.1"
+    "showdown": "^1.9.1",
+    "showdown-highlightjs-extension": "^0.1.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

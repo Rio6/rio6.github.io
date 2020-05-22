@@ -1,10 +1,13 @@
 :root {
     --bg-color: #222;
+    --bg-code: #111;
     --fg-color: #aaa;
-    --fg-header: #ddd;
+    --fg-header: #a80;
     --fg-title: #bbb;
     --fg-dim: #666;
+    --fg-highlight: #a80;
 
+    --content-width: 50vw;
     --footer-height: 30px;
 }
 
@@ -22,10 +25,19 @@ body {
     margin: 0 0 var(--footer-height);
 }
 
+body a {
+    color: var(--fg-highlight);
+}
+
 #header {
     color: var(--fg-header);
     font-size: 1.5em;
     font-weight: bold;
+}
+
+#header a {
+    color: var(--fg-header);
+    text-decoration: none;
 }
 
 #footer {
@@ -38,9 +50,11 @@ body {
 }
 
 #content {
-    width: 50vw;
+    width: var(--content-width);
     min-width: 500px;
+    max-width: 20cm;
     display: inline-block;
+    padding: 1em;
 }
 
 #content {
@@ -48,13 +62,36 @@ body {
 }
 
 #content img {
-    width: 100%;
+    display: inline-block;
+    margin: 0.5em 0;
+    vertical-align: top;
 }
 
 #content h1 {
     color: var(--fg-title);
     font-size: 2em;
     font-weight: bold;
+}
+
+#content pre {
+    background-color: var(--bg-code);
+    padding: 0.5em;
+    border: 2px solid black;
+    width: 100%;
+    max-height: 40vh;
+    overflow: scroll;
+    scrollbar-color: var(--fg-dim) var(--bg-color);
+}
+
+#content pre::-webkit-scrollbar {
+    width: 1em;
+}
+#content pre::-webkit-scrollbar-thumb {
+    background: var(--fg-dim);
+}
+#content pre::-webkit-scrollbar-corner,
+#content pre::-webkit-scrollbar-track {
+    background: var(--bg-color);
 }
 
 #content h1 + h2 {
@@ -67,7 +104,8 @@ body {
 }
 
 #content .post img {
-    max-height: calc(60vw * 9 / 16);
+    width: 100%;
+    max-height: calc(var(--content-width) * 3 / 4);
     object-fit: cover;
     object-position: center;
 }
