@@ -11,6 +11,7 @@
   "dependencies": {
     "glob": "^7.1.6",
     "highlight.js": "^10.0.3",
+    "jsdom": "^16.2.2",
     "plates": "^0.4.11",
     "showdown": "^1.9.1",
     "showdown-highlightjs-extension": "^0.1.2"

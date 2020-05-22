@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
 
+var {JSDOM} = require('jsdom');
 var showdown = require('showdown');
 var plates = require('plates');
 require('showdown-highlightjs-extension');
@@ -37,8 +38,20 @@ for(let file of files) {
     let name = path.basename(file).replace(/.md$/, '');
     let target = path.join(WRITE_DIR, name + '.html');
 
-    let match = data.match(/# (.*?)\n.*## (.+?)\n([^!]|\![^\[])*(!\[.*?\]\((\S+).*?\))*/s);
-    let title = match[1], date = match[2], image = match[5];
+    let fstat = fs.existsSync(file) && fs.statSync(file) || {};
+    let tstat = fs.existsSync(target) && fs.statSync(target) || {};
+    if(Math.max(fstat.mtime, tempStat.mtime, progStat.mtime) < tstat.mtime) {
+        console.log("skip", file);
+        continue;
+    }
+    changed = true;
+
+    let content = converter.makeHtml(data)
+
+    let document = new JSDOM(content).window.document;
+    let title = document.getElementById('title').innerHTML;
+    let date = document.getElementById('date').innerHTML;
+    let image = document.getElementsByTagName('img')[0]?.src;
 
     posts.push({
         name: name,
@@ -47,21 +60,10 @@ for(let file of files) {
         date: date
     });
 
-    let fstat = fs.existsSync(file) && fs.statSync(file) || {};
-    let tstat = fs.existsSync(target) && fs.statSync(target) || {};
-
-    if(Math.max(fstat.mtime, tempStat.mtime, progStat.mtime) < tstat.mtime) {
-        console.log("skip", file);
-        continue;
-    }
-
-    changed = true;
-
     let html = plates.bind(template, {
         title: title,
-        content: converter.makeHtml(data)
+        content: content
     });
-
     fs.writeFile(target, html, err => {
         if(err) throw(err);
         console.log(file, "->", target);

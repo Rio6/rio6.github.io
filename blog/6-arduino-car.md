@@ -1,5 +1,5 @@
-# RC Car with Android, Arduino, Wifi P2P - Arduino 小車
-## 2020-04-07
+# RC Car with Android, Arduino, Wifi P2P - Arduino 小車 {title}
+## 2020-04-07 {date}
 
 Putting another old project of mine here. This is a remote controlled car using Arduino and Wifi Direct on Android. On the car side, an Android phone forwards the commands it got from the controller to Arduino using serial connection, and returns the image data from its camera to the controller. On the controller side, it displays the images, and uses touch screen to generate the commands. The program on the Arduino parses the commands and moves the wheels accordingly.
 

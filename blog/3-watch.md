@@ -1,5 +1,5 @@
-# Watch - 手錶
-## 2020-03-09
+# Watch - 手錶 {title}
+## 2020-03-09 {date}
 
 It’s been a while since I touched this blog. Let’s put some new things!
 

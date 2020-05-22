@@ -1,5 +1,5 @@
-# TicTacToe 圈圈叉叉
-## 2015-07-24
+# TicTacToe 圈圈叉叉 {title}
+## 2015-07-24 {date}
 
 An Android app where you can play Tictactoe with AI  
 這是一個可以跟AI對戰的android app  

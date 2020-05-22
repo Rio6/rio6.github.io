@@ -1,5 +1,5 @@
-# IstroStats – Istrolid Game Data Collector - Istrolid 遊戲資訊收集
-## 2020-03-24
+# IstroStats – Istrolid Game Data Collector - Istrolid 遊戲資訊收集 {title}
+## 2020-03-24 {date}
 
 I’ve been playing the game [Istrolid](http://www.istrolid.com/) for almost 4 years. Other than it’s simple and fun, the most intriguing part of this game is it’s modibility. Since it’s written in Coffeescript, and no code obfuscation was applied, so I can easily add in my own code into the game. In fact, most repos on my [Gist](https://gist.github.com/Rio6) are plugins for this game.
 

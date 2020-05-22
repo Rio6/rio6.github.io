@@ -1,5 +1,5 @@
-# ESP32 Alarm Clock - ESP32 鬧鐘
-## 2020-03-09
+# ESP32 Alarm Clock - ESP32 鬧鐘 {title}
+## 2020-03-09 {date}
 
 A long time ago I bought an ESP32 microcontroller. Not sure what to do with it, so it ended up being an alarm clock. It can do: Automatically adjusting time (including that annoying daylight saving time), grabbing weather data from [openweathermap.org](http://openweathermap.org/), weekly and daily alarms, auto brightness (using a photoresistor). To control it, aluminum foils are taped onto the side and connected via wires. When they touch a finger, the capacitance change can be detected by ESP32. It was coded in C
 

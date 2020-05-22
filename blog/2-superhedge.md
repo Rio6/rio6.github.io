@@ -1,5 +1,5 @@
-# Superhedge
-## 2016-01-04
+# Superhedge {title}
+## 2016-01-04 {date}
 
 This is a game about a hedgehog. Help the hedgehog through challenges, levels and apples.  
 這是一個關於刺蝟的冒險遊戲，你需要幫助刺蝟躲過每個難關，一直前進

@@ -1,5 +1,5 @@
-# My Old Java Applications - 以前寫的Java程式
-## 2015-03-08
+# My Old Java Applications - 以前寫的Java程式 {title}
+## 2015-03-08 {date}
 
 Some of my old java apps when I first started to learn programming.
 
