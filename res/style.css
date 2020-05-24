@@ -4,10 +4,9 @@
     --fg-color: #aaa;
     --fg-header: #a80;
     --fg-title: #bbb;
-    --fg-hover: #ddd;
     --fg-dim: #666;
     --fg-highlight: #a80;
-    --fg-highlight-hover: #b91;
+    --fg-hover: #b91;
 
     --content-width: 50vw;
     --footer-height: 30px;
@@ -32,7 +31,7 @@ a {
 }
 
 a:hover {
-    color: var(--fg-highlight-hover);
+    color: var(--fg-hover);
 }
 
 #header {
@@ -129,8 +128,4 @@ a:hover {
 
 #content .post a {
     text-decoration: none;
-}
-
-#content .post a:hover h1 {
-    color: var(--fg-hover);
 }
