@@ -3,11 +3,17 @@
         <script>
             var langs = ['en', 'zh-TW'];
             var lang = localStorage['language'] || navigator.language;
-            if(langs.indexOf(lang) >= 0) {
-                document.location.replace(
-                    document.location.href.replace(/(index\.html$|$)/, `index.${lang}.html`)
-                );
+            if(!langs.some(function(l) {
+                if(l.slice(0, 2) === lang.slice(0, 2)) {
+                    lang = l;
+                    return true;
+                }
+            })) {
+                lang = langs[0];
             }
+            document.location.replace(
+                document.location.href.replace(/(index\.html$|$)/, `index.${lang}.html`)
+            );
         </script>
     </head>
     <body></body>
