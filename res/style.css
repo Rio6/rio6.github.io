@@ -4,8 +4,10 @@
     --fg-color: #aaa;
     --fg-header: #a80;
     --fg-title: #bbb;
+    --fg-hover: #ddd;
     --fg-dim: #666;
     --fg-highlight: #a80;
+    --fg-highlight-hover: #b91;
 
     --content-width: 50vw;
     --footer-height: 30px;
@@ -25,8 +27,12 @@ body {
     margin: 0 0 var(--footer-height);
 }
 
-body a {
+a {
     color: var(--fg-highlight);
+}
+
+a:hover {
+    color: var(--fg-highlight-hover);
 }
 
 #header {
@@ -123,4 +129,8 @@ body a {
 
 #content .post a {
     text-decoration: none;
+}
+
+#content .post a:hover h1 {
+    color: var(--fg-hover);
 }
