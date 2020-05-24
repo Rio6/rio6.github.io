@@ -57,8 +57,8 @@ a:hover {
     font-size: 0.8em;
     position: fixed;
     min-width: 3em;
-    right: 1em;
-    top: 1em;
+    right: 2px;
+    top: 2px;
 }
 
 #footer {
@@ -72,7 +72,7 @@ a:hover {
 
 #content {
     width: var(--content-width);
-    min-width: 500px;
+    min-width: 300px;
     max-width: 20cm;
     display: inline-block;
     padding: 1em;
