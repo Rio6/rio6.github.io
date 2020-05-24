@@ -38,6 +38,11 @@ a:hover {
     color: var(--fg-header);
     font-size: 1.5em;
     font-weight: bold;
+    padding: 1em;
+}
+
+#header h1 {
+    margin: 0;
 }
 
 #header a {
