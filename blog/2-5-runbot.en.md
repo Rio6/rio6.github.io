@@ -3,8 +3,6 @@
 
 A game to control a running robot. It’s written in C++, and uses [libsdl](https://www.libsdl.org/), so it can run on all Linux, Windows, OsX, Android, and IOS. Though I’m poor so it’s not on the App Store.
 
-一個操控機器人跑步的遊戲。用的是C++跟[libsdl](https://www.libsdl.org/)，所以在Linux、Windows、OsX、Android、IOS都可以跑。不過我沒錢放App Store就是了。
-
 \> [Github](https://github.com/Rio6/Runbot)  
 \> [Google Play](https://play.google.com/store/apps/details?id=net.rio.runbot)  
 \> [Others](https://github.com/Rio6/Runbot/releases)
