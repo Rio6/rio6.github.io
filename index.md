@@ -10,3 +10,6 @@ A running robot game
 
 [Box](https://rio6.github.io/Box):
 A floating box
+
+## My Blog
+[rio6.github.io/blog](https://rio6.github.io/blog)
