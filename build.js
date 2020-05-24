@@ -4,7 +4,6 @@ var glob = require('glob');
 
 var {JSDOM} = require('jsdom');
 var showdown = require('showdown');
-var plates = require('plates');
 require('showdown-highlightjs-extension');
 
 const READ_DIR = './blog';
@@ -48,10 +47,10 @@ for(let file of files) {
 
     let content = converter.makeHtml(data)
 
-    let document = new JSDOM(content).window.document;
-    let title = document.getElementById('title').innerHTML;
-    let date = document.getElementById('date').innerHTML;
-    let image = document.getElementsByTagName('img')[0]?.src;
+    let postDom = new JSDOM(content).window.document;
+    let title = postDom.getElementById('title').innerHTML;
+    let date = postDom.getElementById('date').innerHTML;
+    let image = postDom.getElementsByTagName('img')[0]?.src;
 
     posts.push({
         name: name,
@@ -60,11 +59,11 @@ for(let file of files) {
         date: date
     });
 
-    let html = plates.bind(template, {
-        title: title,
-        content: content
-    });
-    fs.writeFile(target, html, err => {
+    let htmlDom = new JSDOM(template).window.document;
+    htmlDom.getElementById('title').innerHTML = title;
+    htmlDom.getElementById('content').innerHTML = content;
+
+    fs.writeFile(target, htmlDom.documentElement.outerHTML, err => {
         if(err) throw(err);
         console.log(file, "->", target);
     });
@@ -76,23 +75,22 @@ if(changed) {
 
     for(let post of posts.reverse()) { // File with bigger filename comes first
         content += `
-<div class="post">
-    <a href="${post.name + '.html'}">
-        <h1>${post.title}</h1>
-        <h2>${post.date}</h2>
-        ${post.image && `<img src="${post.image}" />` || ''}
-    </a>
-</div>
-    `;
+            <div class="post">
+                <a href="${post.name + '.html'}">
+                    <h1>${post.title}</h1>
+                    <h2>${post.date}</h2>
+                    ${post.image && `<img src="${post.image}" />` || ''}
+                </a>
+            </div>
+        `;
     }
 
-    let html = plates.bind(template, {
-        title: "Rio's Blog",
-        content: converter.makeHtml(content)
-    });
+    let htmlDom = new JSDOM(template).window.document;
+    htmlDom.getElementById('title').innerHTML = "Rio's Blog";
+    htmlDom.getElementById('content').innerHTML = content;
 
     let target = path.join(WRITE_DIR, 'index.html');
-    fs.writeFile(target, html, err => {
+    fs.writeFile(target, htmlDom.documentElement.outerHTML, err => {
         if(err) throw(err);
         console.log("index ->", target);
     });
