@@ -58,8 +58,8 @@ for(let file of files) {
     let content = converter.makeHtml(data)
 
     let postDom = new JSDOM(content).window.document;
-    let title = postDom.getElementById('title').innerHTML;
-    let date = postDom.getElementById('date').innerHTML;
+    let title = postDom.getElementById('title')?.innerHTML;
+    let date = postDom.getElementById('date')?.innerHTML;
     let image = postDom.getElementsByTagName('img')[0]?.src;
 
     let getLang = file => file.match(/(\.([^.]+))*\.md$/)[2];
@@ -93,6 +93,8 @@ for(let file of files) {
 // Main page
 if(changed) {
     let langs = posts.map(p => p.lang);
+    langs = langs.filter((l,i) => langs.indexOf(l) === i);
+
     for(let lang of langs) {
         if(!lang) continue;
 

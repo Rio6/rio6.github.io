@@ -40,6 +40,17 @@ body a {
     text-decoration: none;
 }
 
+#lang-select {
+    color: var(--fg-color);
+    background-color: var(--bg-color);
+    border: none;
+    font-size: 0.8em;
+    position: fixed;
+    min-width: 3em;
+    right: 1em;
+    top: 1em;
+}
+
 #footer {
     position: absolute;
     height: var(--footer-height);

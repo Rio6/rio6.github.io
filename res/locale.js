@@ -4,7 +4,7 @@ window.onload = function() {
     if(selector) {
         selector.addEventListener('change', function(e) {
             var lang = e.target.value || 'en';
-            localStorage['lang'] = lang;
+            localStorage['language'] = lang;
             window.location.replace(
                 window.location.href.replace(/\.[^.]+\.html$/, `.${e.target.value}.html`)
             );
