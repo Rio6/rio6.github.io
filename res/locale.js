@@ -6,7 +6,7 @@ window.onload = function() {
             var lang = e.target.value || 'en';
             localStorage['language'] = lang;
             window.location.replace(
-                window.location.href.replace(/\.[^.]+\.html$/, `.${e.target.value}.html`)
+                window.location.href.replace(/\.[^.]+\.html$/, '.' + e.target.value + '.html')
             );
         });
     }
