@@ -82,6 +82,10 @@ a:hover {
     text-align: left;
 }
 
+#content p {
+    line-height: 1.5;
+}
+
 #content img {
     display: inline-block;
     margin: 0.5em 0;
