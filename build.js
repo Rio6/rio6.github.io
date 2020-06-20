@@ -15,15 +15,19 @@ const langName = {
     'zh-TW': "繁體中文"
 };
 
-let makeHTML = (template, title, content, langs, lang) => {
+let makeHTML = (template, name, title, content, langs, lang) => {
     let document = new JSDOM(template).window.document;
     document.getElementById('title').innerHTML = title;
     document.getElementById('content').innerHTML = content;
+
     document.getElementById('lang-select').innerHTML =
-        langs.map(l => l && `
-            <option value="${l}" ${l === lang ? 'selected disabled' : ''}>
-                ${langName[l] || l}
-            </option>
+        `<li>${langName[lang] || lang}</li>` +
+        langs.map(l => l && l !== lang && `
+            <li>
+                <a href="${name}.${l}.html"}>
+                    ${langName[l] || l}
+                </a>
+            </li>
         ` || '').reduce((a,c) => a+c, '');
     return document.documentElement.outerHTML;
 };
@@ -51,20 +55,21 @@ let changed = false;
 let files = glob.sync(path.join(READ_DIR, '*.md'));
 for(let file of files) {
 
-    let data = fs.readFileSync(file, 'utf-8');
-    let name = path.basename(file).replace(/\.md$/, '');
-    let target = path.join(WRITE_DIR, name + '.html');
+    let name = path.basename(file).replace(/(\.[^.]+)*\.md$/, '');
 
+    let data = fs.readFileSync(file, 'utf-8');
     let content = converter.makeHtml(data)
+
+    let getLang = file => file.match(/(\.([^.]+))*\.md$/)[2];
+    let lang = getLang(file);
+    let langs = glob.sync(file.replace(/\.[^.]+\.md$/, '.*.md')).map(getLang);
+
+    let target = path.join(WRITE_DIR, `${name}.${lang}.html`);
 
     let postDom = new JSDOM(content).window.document;
     let title = postDom.getElementById('title')?.innerHTML;
     let date = postDom.getElementById('date')?.innerHTML;
     let image = postDom.getElementsByTagName('img')[0]?.src;
-
-    let getLang = file => file.match(/(\.([^.]+))*\.md$/)[2];
-    let lang = getLang(file);
-    let langs = glob.sync(file.replace(/\.[^.]+\.md$/, '.*.md')).map(getLang);
 
     posts.push({
         name: name,
@@ -84,7 +89,7 @@ for(let file of files) {
     changed = true;
 
     // write file
-    fs.writeFile(target, makeHTML(template, title, content, langs, lang), err => {
+    fs.writeFile(target, makeHTML(template, name, title, content, langs, lang), err => {
         if(err) throw(err);
         console.log(file, "->", target);
     });
@@ -103,7 +108,7 @@ if(changed) {
         for(let post of posts.filter(p => !p.lang || p.lang === lang).reverse()) { // File with bigger filename comes first
             content += `
                 <div class="post">
-                    <a href="${post.name + '.html'}">
+                    <a href="${post.name}.${post.lang}.html">
                         <h1>${post.title}</h1>
                         <h2>${post.date}</h2>
                         ${post.image && `<img src="${post.image}" />` || ''}
@@ -113,7 +118,7 @@ if(changed) {
         }
 
         let target = path.join(WRITE_DIR, `index.${lang}.html`);
-        fs.writeFile(target, makeHTML(template, "Rio's Blog", content, langs, lang), err => {
+        fs.writeFile(target, makeHTML(template, 'index', "Rio's Blog", content, langs, lang), err => {
             if(err) throw(err);
             console.log("index ->", target);
         });
