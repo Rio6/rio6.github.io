@@ -24,7 +24,7 @@ let makeHTML = (template, name, title, content, langs, lang) => {
         `<li>${langName[lang] || lang}</li>` +
         langs.map(l => l && l !== lang && `
             <li>
-                <a href="${name}.${l}.html"}>
+                <a href="${name}.${l}.html">
                     ${langName[l] || l}
                 </a>
             </li>
