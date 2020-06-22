@@ -64,7 +64,7 @@ for(let file of files) {
     let lang = getLang(file);
     let langs = glob.sync(file.replace(/\.[^.]+\.md$/, '.*.md')).map(getLang);
 
-    let target = path.join(WRITE_DIR, `${name}.${lang}.html`);
+    let target = path.join(WRITE_DIR, path.relative(READ_DIR, file.replace(/\.md$/, '.html')));
 
     let postDom = new JSDOM(content).window.document;
     let title = postDom.getElementById('title')?.innerHTML;
