@@ -13,11 +13,12 @@
             }
 
             var path = document.location.pathname;
-            if(path === '/') path = '/index.html';
+            if(path.endsWith('/')) path += 'index.html';
 
-            document.location.replace(
-                path.replace(/.html$/, '.' + lang  + '.html') + document.location.search + document.location.hash
-            );
+            var target = path.replace(/\.html$/, '.' + lang  + '.html');
+            if(target !== document.location.pathname) {
+                document.location.replace(target);
+            }
         </script>
     </head>
     <body>
