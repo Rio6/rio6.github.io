@@ -12,7 +12,7 @@
                 lang = langs[0];
             }
 
-            var path = document.location.pathname;
+            var path = new URLSearchParams(location.search).get('to') || document.location.pathname;
             if(path.endsWith('/')) path += 'index.html';
 
             var target = path.replace(/\.html$/, '.' + lang  + '.html');
