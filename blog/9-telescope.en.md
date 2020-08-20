@@ -36,6 +36,10 @@ Making the focuser took me longer. I originally wanted to use 3D printer to prin
 ![](img/telescope/focuser1.jpg =100%x*)
 </div>
 
+08/20 Update:  
+Found some pipes to make a Crayford focuser, not too bad.
+![](img/telescope/crayford.jpg =100%x*)
+
 Collimation was done using eye balls - if it looks aligned, it is aligned. The primary mirror can be adjusted with a few knobs, the curved spider holding the secondary are adjusted by bending it by hand, then screws for finer adjustment. When doing that, I found that I made the secondary holder too long, so I had to cut of like half a centimeter from the top.
 
 Using this telescope feels pretty good. I only have plastic tripods, so things are a little bit shaky. And it gets affected by local light sources a lot since there's nothing in its middle secion. But looking at Saturn, Jupiter, Moon, etc, is pretty clear. It's brighter and has a wider field of view compared to my old one. Taking a picture is kind of annoying, though. I tried to attach a webcam to the focuser for pictures, but I didn't like the result. Then I discovered this phone eye piece mount thing, so I made one myself so I can take pictures with my phone.
