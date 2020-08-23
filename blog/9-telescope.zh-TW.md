@@ -48,7 +48,7 @@
 ![](img/telescope/phone.jpg =49%x*)
 ![](img/telescope/phone_mount.jpg =49%x*)
 
-這裡放些拍到的照片。我家光害大，加上手機不夠專業所以只有太陽系內的明亮天體。用錄影的方式來收集幾百到一兩千幀圖像，然後用 [PIPP](https://sites.google.com/site/astropipp/) => [Autostakkert](https://www.autostakkert.com/) => [RegiStax](https://www.astronomie.be/registax/) => [GIMP](https://www.gimp.org/) 來把它們疊起來、加深細節、顏色平衡等等。我目前還是菜鳥所以得出的圖還是破破的（而且相機APP的解析好像沒設成最高，連月亮都糊糊的）。不過至少看的出拍的是什麼天體（火星除外）。直接看是可以看到很多肉眼看不到的星星，仙女座河系淡淡的一坨看得到，不過比 Neowise 彗星還淡。
+這裡放些拍到的照片。我家光害大，加上手機不夠專業所以只有太陽系內的明亮天體。用錄影的方式來收集幾百到一兩千幀圖像，然後用 [PIPP](https://sites.google.com/site/astropipp/) => [Autostakkert](https://www.autostakkert.com/) => [RegiStax](https://www.astronomie.be/registax/) => [GIMP](https://www.gimp.org/) 來把它們疊起來、加深細節、顏色平衡等等。我目前還是菜鳥所以得出的圖還是破破的（而且相機APP的解析好像沒設成最高，連月亮都糊糊的）。不過至少看的出拍的是什麼天體。直接看是可以看到很多肉眼看不到的星星，仙女座河系淡淡的一坨看得到，不過比 Neowise 彗星還淡。
 
 <div markdown=1 style="display: inline-block; width: 49%; vertical-align: top">
 <center>木星</center>
