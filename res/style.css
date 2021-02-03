@@ -103,7 +103,7 @@ a:hover {
 #content {
     width: var(--content-width);
     min-width: 300px;
-    max-width: 20cm;
+    max-width: 30cm;
     display: inline-block;
     padding: 1em;
 }
@@ -136,6 +136,13 @@ a:hover {
     max-height: 40vh;
     overflow: scroll;
     scrollbar-color: var(--fg-dim) var(--bg-color);
+}
+
+#content p > code {
+    background-color: var(--bg-code);
+    border-radius: 2px;
+    border: 1px solid black;
+    padding: 0 5px;
 }
 
 #content pre::-webkit-scrollbar {
