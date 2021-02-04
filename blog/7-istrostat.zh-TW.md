@@ -11,6 +11,6 @@
 
 之前對SQL不怎麼熟，只知道怎麼 SELECT * FROM players WHERE name = “Hello"; 這次做這個學了不少東西，像是 GROUP BY, ORDER BY, JOIN ON 等指令。SQL技能升等一級！
 
-整個專案我[有放在Github上](https://github.com/Rio6/IstroStats/)，可以在這裡看到：<http://istrostats.ddns.net/>
+整個專案我[有放在Github上](https://github.com/Rio6/IstroStats/)，可以在這裡看到：<http://istrostats.r26.me/>
 
 ![](img/istrostats.png =100%x*)

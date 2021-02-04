@@ -11,6 +11,6 @@ For the frontend, I use [Bootstrap](https://getbootstrap.com/) and [JQuery](http
 
 Before I wasn’t very famaliar with SQL. All I knew was easy things like SELECT * FROM players WHERE name = “HELLO"; Through this project, I learned more things, like GROUP BY, ORDER BY, JOIN ON. Leveling up my SQL skill!
 
-I put the whole project on [Github](https://github.com/Rio6/IstroStats/), and the service is currently running here: <http://istrostats.ddns.net/>
+I put the whole project on [Github](https://github.com/Rio6/IstroStats/), and the service is currently running here: <http://istrostats.r26.me/>
 
 ![](img/istrostats.png =100%x*)
