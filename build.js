@@ -29,6 +29,13 @@ let makeHTML = (template, name, title, content, langs, lang) => {
                 </a>
             </li>
         ` || '').reduce((a,c) => a+c, '');
+
+    if(process.env.NODE_ENV === 'development') {
+        const livejs = document.createElement('script');
+        livejs.src = 'https://livejs.com/live.js';
+        document.getElementsByTagName('head')[0].appendChild(livejs);
+    }
+
     return document.documentElement.outerHTML;
 };
 

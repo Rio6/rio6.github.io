@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -r dist/",
     "build": "node build.js && cp -ruv res/* dist/",
-    "watch": "concurrently \"nodemon -e 'md css html js' -w . -i dist -x 'npm run build'\" \"simplehttpserver dist\""
+    "watch": "NODE_ENV=development concurrently \"nodemon -e 'md css html js' -w . -i dist -x 'npm run build'\" \"simplehttpserver dist\""
   },
   "author": "Rio6",
   "dependencies": {
