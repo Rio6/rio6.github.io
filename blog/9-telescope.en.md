@@ -38,7 +38,16 @@ Making the focuser took me longer. I originally wanted to use 3D printer to prin
 
 08/20 Update:  
 Found some pipes to make a Crayford focuser, not too bad.
-![](img/telescope/crayford.jpg =100%x*)
+<center>
+![](img/telescope/crayford.jpg =80%x*)
+</center>
+
+2021/7/13 Update:  
+I got a new [Creality Ender-3 Pro](https://www.creality.com/goods-detail/ender-3-pro-3d-printer) 3D printer, so I spent some time designing a new focuser for the telescope.
+It was designed in Solidworks, but the license from school expire midway through I was basically locked out from my own files. I had to remote desktop into school's computer to finish it...  I think I'll try to avoid using these expensive programs in the future.
+
+![](img/telescope/focuser_new0.jpg =49%x*)
+![](img/telescope/focuser_new1.jpg =49%x*)
 
 Collimation was done using eye balls - if it looks aligned, it is aligned. The primary mirror can be adjusted with a few knobs, the curved spider holding the secondary are adjusted by bending it by hand, then screws for finer adjustment. When doing that, I found that I made the secondary holder too long, so I had to cut of like half a centimeter from the top.
 
