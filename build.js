@@ -1,9 +1,9 @@
-var fs = require('fs');
-var path = require('path');
-var glob = require('glob');
+const fs = require('fs');
+const path = require('path');
+const glob = require('glob');
 
-var {JSDOM} = require('jsdom');
-var showdown = require('showdown');
+const {JSDOM} = require('jsdom');
+const showdown = require('showdown');
 require('showdown-highlightjs-extension');
 
 const READ_DIR = './blog';
@@ -15,8 +15,10 @@ const langName = {
     'zh-TW': "繁體中文"
 };
 
-let makeHTML = (template, name, title, content, langs, lang) => {
-    let document = new JSDOM(template).window.document;
+const makeHTML = (template, name, title, content, langs, lang) => {
+    const jsdom = new JSDOM(template);
+    const document = jsdom.window.document;
+
     document.getElementById('title').innerHTML = title;
     document.getElementById('content').innerHTML = content;
 
@@ -36,14 +38,14 @@ let makeHTML = (template, name, title, content, langs, lang) => {
         document.getElementsByTagName('head')[0].appendChild(livejs);
     }
 
-    return document.documentElement.outerHTML;
+    return jsdom.serialize();
 };
 
 if(!fs.existsSync(WRITE_DIR)) {
     fs.mkdirSync(WRITE_DIR);
 }
 
-let converter = new showdown.Converter({
+const converter = new showdown.Converter({
     customizedHeaderId: true,
     parseImgDimensions: true,
     openLinksInNewWindow: true,
