@@ -120,7 +120,7 @@ if(changed) {
                     <a href="${post.name}.${post.lang}.html">
                         <h1>${post.title}</h1>
                         <h2>${post.date}</h2>
-                        ${post.image && `<img src="${post.image}" />` || ''}
+                        ${post.image && `<img src="${post.image}" loading="lazy" />` || ''}
                     </a>
                 </div>
             `;
