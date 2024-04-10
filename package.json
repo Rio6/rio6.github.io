@@ -13,7 +13,8 @@
     "highlight.js": "^10.0.3",
     "jsdom": "^16.2.2",
     "showdown": "^1.9.1",
-    "showdown-highlightjs-extension": "^0.1.2"
+    "showdown-highlight": "^3.1.0",
+    "showdown-toc": "^1.0.1"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",

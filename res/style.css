@@ -1,6 +1,7 @@
 :root {
     --bg-color: #222;
     --bg-code: #111;
+    --bg-highlight: #555;
     --fg-color: #aaa;
     --fg-header: #a80;
     --fg-title: #bbb;
@@ -32,6 +33,15 @@ a {
 
 a:hover {
     color: var(--fg-hover);
+}
+
+@keyframes highlight {
+    from { background-color: var(--bg-highlight); }
+    to { background-color: var(--bg-color); }
+}
+
+:target {
+    animation: highlight 1s ease;
 }
 
 #header {
@@ -138,10 +148,8 @@ a:hover {
     scrollbar-color: var(--fg-dim) var(--bg-color);
 }
 
-#content p > code {
+#content code {
     background-color: var(--bg-code);
-    border-radius: 2px;
-    border: 1px solid black;
     padding: 0 5px;
 }
 
@@ -174,4 +182,31 @@ a:hover {
 
 #content .post a {
     text-decoration: none;
+}
+
+table, th, td {
+    padding: 5px 10px;
+    border-collapse: collapse;
+    border: 1px solid var(--fg-dim);
+}
+
+.reference {
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+.reference > ol {
+    list-style-type: none;
+}
+.reference > ol > li {
+    counter-increment: step-counter;
+}
+.reference > ol > li::before {
+    content: '[' counter(step-counter) ']';
+    margin-right: 10px;
+}
+
+.subfig {
+    display: inline-block;
+    vertical-align: middle;
 }

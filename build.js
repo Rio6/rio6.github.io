@@ -4,7 +4,8 @@ const glob = require('glob');
 
 const {JSDOM} = require('jsdom');
 const showdown = require('showdown');
-require('showdown-highlightjs-extension');
+const showdownHighlight = require('showdown-highlight');
+const showdownToc = require('showdown-toc');
 
 const READ_DIR = './blog';
 const WRITE_DIR = './dist';
@@ -50,7 +51,7 @@ const converter = new showdown.Converter({
     parseImgDimensions: true,
     openLinksInNewWindow: true,
     tables: true,
-    extensions: ['highlightjs']
+    extensions: [showdownToc(), showdownHighlight()],
 });
 
 let template = fs.readFileSync(TEMPLATE, 'utf-8');
