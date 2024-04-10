@@ -1040,4 +1040,4 @@ print(encode_bp(generate()))
 </ol>
 <!-- }}} -->
 
-<!-- vim: foldmethod=marker textwidth=80: spell -->
+<!-- vim: foldmethod=marker textwidth=80 spell: -->
