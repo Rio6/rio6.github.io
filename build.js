@@ -76,10 +76,17 @@ for(let file of files) {
 
     let target = path.join(WRITE_DIR, path.relative(READ_DIR, file.replace(/\.md$/, '.html')));
 
-    let postDom = new JSDOM(content).window.document;
-    let title = postDom.getElementById('title')?.innerHTML;
-    let date = postDom.getElementById('date')?.innerHTML;
-    let image = postDom.getElementsByTagName('img')[0]?.src;
+    let postDom = new JSDOM(content);
+    let doc = postDom.window.document;
+    let title = doc.getElementById('title')?.innerHTML;
+    let date = doc.getElementById('date')?.innerHTML;
+    let imgs = doc.getElementsByTagName('img');
+    let image = imgs[0]?.src;
+
+    for(img of imgs) {
+        img.setAttribute("srcset", img.src + ".webp");
+        img.setAttribute("loading", "lazy");
+    }
 
     posts.push({
         name: name,
@@ -99,7 +106,7 @@ for(let file of files) {
     changed = true;
 
     // write file
-    fs.writeFile(target, makeHTML(template, name, title, content, langs, lang), err => {
+    fs.writeFile(target, makeHTML(template, name, title, postDom.serialize(), langs, lang), err => {
         if(err) throw(err);
         console.log(file, "->", target);
     });
@@ -121,7 +128,7 @@ if(changed) {
                     <a href="${post.name}.${post.lang}.html">
                         <h1>${post.title}</h1>
                         <h2>${post.date}</h2>
-                        ${post.image && `<img src="${post.image}" loading="lazy" />` || ''}
+                        ${post.image && `<img src="${post.image}" srcset="${post.image}.webp" loading="lazy" />` || ''}
                     </a>
                 </div>
             `;
