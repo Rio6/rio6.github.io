@@ -115,17 +115,17 @@ or a colour) and a value [[5]](#wiki-circuit). Figure 2(a) shows the some of the
 signals in the signal selection menu. Figure 2(b) shows how the game represents the
 values of signals.
 
-<center>
-<div markdown=1 class=subfig style="width: 35%; vertical-align: top">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 35%; vertical-align: top">
 <center>(a) List of signals in the virtual signal tab</center>
 ![](img/factorio-ram/signals.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 30%; vertical-align: top">
+<div markdown=1 style="width: 30%; vertical-align: top">
 <center>(b) Examples of signals in game</center>
 ![](img/factorio-ram/signals_pole.png =100%x*)
 </div>
-Figure 2 Examples of signals in game
-</center>
+</div>
+<center>Figure 2 Examples of signals in game</center>
 
 These signals carries all the states in the circuit. The signals are updated
 every game tick, which is 60 times per second. Changing the state of each signal
@@ -145,17 +145,17 @@ can be configured to output a constant value on specified signals
 and the available operations can be performed by arithmetic and decider
 combinators.
 
-<center>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 40%">
 <center>Arithmetic combinator</center>
 ![](img/factorio-ram/arith_comb.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 style="width: 40%">
 <center>Decider combinator</center>
 ![](img/factorio-ram/deci_comb.png =100%x*)
 </div>
-Figure 3 Combinators UI in game
-</center>
+</div>
+<center>Figure 3 Combinators UI in game</center>
 
 In addition, the combinators can process multiple signals at once. The
 arithmetic has a special signal called *Each*. When it is selected, the
@@ -175,20 +175,21 @@ the same wire, the input connected to that wire would read `{A: 4, B: 2, C:
 combinator, and is an important feature for many counter and timer designs.
 Figure 4 shows a simple counter design utilizing this mechanic.
 
-<center>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 30%">
 <center>In game construction</center>
 ![](img/factorio-ram/counter.png =100%x*)
+<center>Diagram</center>
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/counter_d.png =100%x*)
 </span>
 </div>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 style="width: 40%">
 <center>Plot of counter output</center>
 ![](img/factorio-ram/counter_v.png =100%x*)
 </div>
-Figure 4 Simple 0 to 9 counter design
-</center>
+</div>
+<center>Figure 4 Simple 0 to 9 counter design</center>
 
 ### Wire Colours
 In the game, there are 2 colours of wires (green and red) that carries the
@@ -200,21 +201,23 @@ when both wires contain the same signal are connected to the input of a
 combinator, the combinator receives the sum of two signal sets as described in
 [Multiple Output Behaviour](#secmob).
 
-<center>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 30%">
+<center>Construction</center>
 ![](img/factorio-ram/wires.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 25%">
+<div markdown=1 style="width: 25%">
+<center>Diagram</center>
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/wires_d.png =100%x*)
 </span>
 </div>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 style="width: 30%">
 <center>Input and output capture</center>
 ![](img/factorio-ram/wires_v.png =100%x*)
 </div>
-Figure 5 Example circuit using two wire colours
-</center>
+</div>
+<center>Figure 5 Example circuit using two wire colours</center>
 
 Being able to connect more than one set of signals to an input provides a lot of
 freedom in terms of routing signals, and in many cases, reduces the combinators
@@ -239,17 +242,17 @@ constant combinator starts output a signal (set by players), the data would be
 on the green wire for one tick, then gets subtracted back to zero as the
 arithmetic combinator outputs the negated value in next tick.
 
-<center>
-<div markdown=1 class=subfig style="width: 15%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 15%">
 ![](img/factorio-ram/edge.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 style="width: 30%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/edge_d.png =100%x*)
 </span>
 </div>
-Figure 6 An edge detector circuit
-</center>
+</div>
+<center>Figure 6 An edge detector circuit</center>
 
 However, most of the time this desynchronization can cause undesired data to
 appear in the circuit for a few game ticks. At best case, it slows down the
@@ -258,17 +261,17 @@ can be hard to debug.  That's why it is a common practice to add a dummy gate,
 like addition by 0, to match the timing of each circuit. Figure 7
 shows an example of such circuit.
 
-<center>
-<div markdown=1 class=subfig style="width: 20%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 20%">
 ![](img/factorio-ram/sync.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 style="width: 30%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/sync_d.png =100%x*)
 </span>
 </div>
-Figure 7 Example circuit of synchronizing multiple signal paths
-</center>
+</div>
+<center>Figure 7 Example circuit of synchronizing multiple signal paths</center>
 
 <!-- }}} -->
 
@@ -397,17 +400,17 @@ the data to multiply each tick.
 
 Figure 8 shows the in game construction and diagram of this circuit.
 
-<center>
-<div markdown=1 class=subfig style="width: 15%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 15%">
 ![](img/factorio-ram/cell.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 25%">
+<div markdown=1 style="width: 25%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/cell_d.png =100%x*)
 </span>
 </div>
-Figure 8 Simplest memory device in Factorio
-</center>
+</div>
+<center>Figure 8 Simplest memory device in Factorio</center>
 
 An `R` signal is used as reset signal. When the signal becomes non-zero,
 the combinator gets disabled and thus the loop back stops.
@@ -421,17 +424,17 @@ To make the memory circuit easier to use for RAM, two things need to be added:
 
 Figure 9 shows a circuit that achieves the requirements.
 
-<center>
-<div markdown=1 class=subfig style="width: 20%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 20%">
 ![](img/factorio-ram/write.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 style="width: 30%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/write_d.png =100%x*)
 </span>
 </div>
-Figure 9 Memory cell with write addressing
-</center>
+</div>
+<center>Figure 9 Memory cell with write addressing</center>
 
 Here, `123` is used as the address of this cell. When the write address
 signal `W` is set to `123` on the green wire, the memory cell
@@ -455,17 +458,17 @@ can be achieved easily with another decider combinators.
 
 Figure 10 shows the read address combinator added to the memory cell.
 
-<center>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 30%">
 ![](img/factorio-ram/read.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 50%">
+<div markdown=1 style="width: 50%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/read_d.png =100%x*)
 </span>
 </div>
-Figure 10 Memory cell with read addressing
-</center>
+</div>
+<center>Figure 10 Memory cell with read addressing</center>
 
 The mechanics of read addressing is relatively simple compared to write
 addressing. When the read signal `R` of `123` is asserted on the
@@ -495,8 +498,8 @@ Figure 11 shows a RAM instance of 3 cells.
 <center>
 ![](img/factorio-ram/ram.png =30%x*)
 
-Figure 11 A three-cell RAM instance
 </center>
+<center>Figure 11 A three-cell RAM instance</center>
 
 ### Variation: Multi-signal Support {secmssimpl}
 The above 3-combinator cell design only stores one signal, `D`. As
@@ -512,17 +515,17 @@ issue as most circuit would simply ignore the extra signals. Regardless, there
 are still ways to prevent it from happening. Figure 12 shows the
 design.
 
-<center>
-<div markdown=1 class=subfig style="width: 45%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 45%">
 ![](img/factorio-ram/mss.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 style="width: 40%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/mss_d.png =100%x*)
 </span>
 </div>
-Figure 12 Memory cell with multi-signal support
-</center>
+</div>
+<center>Figure 12 Memory cell with multi-signal support</center>
 
 The added arithmetic combinator on the read port is not part of the cell, only
 one is needed for the whole RAM. Its purpose is to subtract away the read
@@ -566,17 +569,17 @@ cell. It is usually not a big issue, as players who prefer not to generate RAM
 instances programmatically tend to create smaller RAMs that are more manageable
 by hand. For that, one combinator per cell isn't much.
 
-<center>
-<div markdown=1 class=subfig style="width: 35%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 35%">
 ![](img/factorio-ram/auto.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 style="width: 40%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/auto_d.png =100%x*)
 </span>
 </div>
-Figure 13 Memory cell with automatic address assignment
-</center>
+</div>
+<center>Figure 13 Memory cell with automatic address assignment</center>
 <!-- }}} -->
 
 <!-- {{{ Analysis -->
@@ -591,17 +594,17 @@ Read latency is the time between read address assertion and read data available.
 The test setup is shown in Figure 14.
 A small electrical pole is used to probe the content of the circuit network.
 
-<center>
-<div markdown=1 class=subfig style="width: 35%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 35%">
 ![](img/factorio-ram/read_an.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 50%">
+<div markdown=1 style="width: 50%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/read_an_d.png =100%x*)
 </span>
 </div>
-Figure 14 Read latency test setup
-</center>
+</div>
+<center>Figure 14 Read latency test setup</center>
 
 The test procedure is as follows:
 1. Using in-game debug tool to pause the game
@@ -629,17 +632,17 @@ having the read address held at the same value as write address. The test setup
 is shown in Figure 15.  A small electrical pole is used to
 probe the content of the circuit network.
 
-<center>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 30%">
 ![](img/factorio-ram/write_an.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 35%">
+<div markdown=1 style="width: 35%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/write_an_d.png =100%x*)
 </span>
 </div>
-Figure 15 Write latency test setup
-</center>
+</div>
+<center>Figure 15 Write latency test setup</center>
 
 The test procedure is as follows:
 1. Enable constant combinator with signal `D`
@@ -654,7 +657,6 @@ The test procedure is as follows:
 
 Write latency test data
 <center>
-<div markdown=1 style="display: inline-block">
 latency wrt write address
 | tick | address signal `W` | data signal `D` |
 |------|--------------------|-----------------|
@@ -662,8 +664,7 @@ latency wrt write address
 | 1    | 1                  | 1               |
 | 2    | 1                  | 1               |
 | 3    | 1                  | 2               |
-</div>
-<div markdown=1 style="display: inline-block">
+
 latency wrt write data
 | tick | address signal `W` | data signal `D` |
 |------|--------------------|-----------------|
@@ -671,7 +672,7 @@ latency wrt write data
 | 1    | 1                  | 1               |
 | 2    | 1                  | 1               |
 | 3    | 1                  | 2               |
-</div>
+
 </center>
 
 The only difference between the two tests is the starting condition. When
@@ -690,17 +691,17 @@ to at the same time on the same address. The test setup is shown in Figure 16.
 Two small electrical poles are used to probe the content of
 the circuit network.
 
-<center>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 40%">
 ![](img/factorio-ram/read_write_an.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 45%">
+<div markdown=1 style="width: 45%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/read_write_an_d.png =100%x*)
 </span>
 </div>
-Figure 16 Concurrent read/write test setup
-</center>
+</div>
+<center>Figure 16 Concurrent read/write test setup</center>
 
 The RAM is preloaded with the value 1, and data input `D` is held at
 value 2.
@@ -742,17 +743,17 @@ are used to probe the content of the circuit network. Two cells are used in this
 setup to test the change of addresses. The content of each cell are read off
 directly from the combinators instead of using electrical poles.
 
-<center>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 40%">
 ![](img/factorio-ram/speed_an.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 40%">
+<div markdown=1 style="width: 40%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/speed_an_d.png =100%x*)
 </span>
 </div>
-Figure 17 Operation speed test setup
-</center>
+</div>
+<center>Figure 17 Operation speed test setup</center>
 
 Since the RAM is designed to operate at highest speed of one operation per tick
 (or 60 operations per second), the test is designed to verify the design works
@@ -778,7 +779,7 @@ The test procedure is as follows:
 17. Progress game one tick at a time and record the change of signal
 
 Operation speed test data
-<center>
+<center style="overflow-x: scroll">
 write speed
 | tick | write address `W` | write data `D` | read address `R` | read data `D` | cell 0 | cell 1 |
 |------|-------------------|----------------|------------------|---------------|--------|--------|
@@ -847,8 +848,8 @@ content. Figure 19 shows the content in one of the train wagons.
 <center>
 ![](img/factorio-ram/train.png =50%x*)
 
-Figure 19 Content in one of the trains
 </center>
+<center>Figure 19 Content in one of the trains</center>
 
 Alternatively, the station can be configured to output a unique train ID to the
 connected network. However, this train ID is more volatile and can change on its
@@ -861,17 +862,17 @@ a falling edge detector then sent to the global network. This provides a single
 tick of address + data on the network to be used by the RAM. Figure
 20 shows the edge detector used by each station.
 
-<center>
-<div markdown=1 class=subfig style="width: 30%">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 30%">
 ![](img/factorio-ram/train_filt.png =100%x*)
 </div>
-<div markdown=1 class=subfig style="width: 35%">
+<div markdown=1 style="width: 35%">
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/train_filt_d.png =100%x*)
 </span>
 </div>
-Figure 20 Edge detector on each station
-</center>
+</div>
+<center>Figure 20 Edge detector on each station</center>
 
 The global network connects all the stations to the central RAM. The RAM is a
 multi-signal variation without automatic address assignment. Since the train can
@@ -891,19 +892,19 @@ Once stored in the RAM, the train ID can then be selected using a constant
 combinator and be viewed from an electric pole. Figure 21
 shows the reading from central RAM of this system.
 
-<center>
-<div markdown=1 class=subfig style="width: 35%; vertical-align: top">
+<div markdown=1 class=subfig>
+<div markdown=1 style="width: 35%; vertical-align: top">
 <center>Address filtering and conversion</center>
 <span style="filter: invert(0.87) hue-rotate(180deg)">
 ![](img/factorio-ram/train_ram_d.png =100%x*)
 </span>
 </div>
-<div markdown=1 class=subfig style="width: 35%; vertical-align: top">
+<div markdown=1 style="width: 35%; vertical-align: top">
 <center>Central RAM outputting content from train 1</center>
 ![](img/factorio-ram/train_ram.png =100%x*)
 </div>
-Figure 21 Central RAM of the system
-</center>
+</div>
+<center>Figure 21 Central RAM of the system</center>
 
 This system is not the most useful thing too build in the game, as there is
 seldom the need to keep track of the content of each train individually.
@@ -918,7 +919,7 @@ The code can be imported into Factorio to recreate the build
 and see the system running in action.
 <!-- }}} -->
 
-<!-- Train BP -->
+<!-- {{{ Train BP -->
 ### Train Content Tracking Blueprint {sectrain_bp}
 ```text
 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
@@ -1016,7 +1017,7 @@ print(encode_bp(generate()))
 ```
 <!-- }}} -->
 
-<!-- Tools Used -->
+<!-- {{{ Tools Used -->
 ## Tools Used
 - Combinator Graph Generator, by sparr. <https://mods.factorio.com/mod/combinatorgraph>
 - Time Series Graphs fixfor110, by Nes\_p. <https://mods.factorio.com/mod/timeseries_fixfor110>

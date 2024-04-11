@@ -9,8 +9,10 @@
     --fg-highlight: #a80;
     --fg-hover: #b91;
 
-    --content-width: 50vw;
+    --content-width: 70vw;
     --footer-height: 30px;
+
+    --min-img-width: 200px;
 }
 
 html {
@@ -23,7 +25,7 @@ body {
     background-color: var(--bg-color);
     text-align: center;
     font-family: Arial;
-    font-size: 20px;
+    font-size: 18px;
     margin: 0 0 var(--footer-height);
 }
 
@@ -112,7 +114,7 @@ a:hover {
 
 #content {
     width: var(--content-width);
-    min-width: 300px;
+    min-width: min(85vw, 30cm);
     max-width: 30cm;
     display: inline-block;
     padding: 1em;
@@ -130,6 +132,7 @@ a:hover {
     display: inline-block;
     margin: 0.5em 0;
     vertical-align: top;
+    min-width: var(--min-img-width);
 }
 
 #content h1 {
@@ -149,6 +152,7 @@ a:hover {
 }
 
 #content code {
+    font-family: "Courier New", monospace;
     background-color: var(--bg-code);
     padding: 0 5px;
 }
@@ -190,23 +194,31 @@ table, th, td {
     border: 1px solid var(--fg-dim);
 }
 
+.subfig {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.subfig > div {
+    min-width: var(--min-img-width);
+}
+
 .reference {
     white-space: nowrap;
     overflow-x: scroll;
 }
 
-.reference > ol {
+ol.reference {
     list-style-type: none;
 }
-.reference > ol > li {
+
+ol.reference > li {
     counter-increment: step-counter;
 }
-.reference > ol > li::before {
+
+ol.reference > li::before {
     content: '[' counter(step-counter) ']';
     margin-right: 10px;
-}
-
-.subfig {
-    display: inline-block;
-    vertical-align: middle;
 }
