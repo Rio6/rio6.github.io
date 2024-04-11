@@ -3,7 +3,7 @@
 
 ![](img/telescope/telescope.jpg =100%x*)
 
-學校金工課需要想個東西來做，想說來做做望遠鏡。望遠鏡我好幾年前在[吳俊輝教授的望遠鏡DIY營隊](https://www.ylib.com/scientific/activity/201311Telescopediy/index.htm)有做過，不過那次是按著已經設計好的規格把材料拼裝起來，這次我想要自己設計和計算尺寸。
+學校金工課需要想個東西來做，想說來做做望遠鏡。望遠鏡我好幾年前在[吳俊輝教授的望遠鏡DIY營隊](https://web.archive.org/web/20160316214002/https://www.ylib.com/scientific/activity/201311Telescopediy/index.htm)有做過，不過那次是按著已經設計好的規格把材料拼裝起來，這次我想要自己設計和計算尺寸。
 
 因為是金工課，當然是做金屬製望遠鏡。網路上逛了逛找到了這個 [Gary Seronik 做的望遠鏡](https://garyseronik.com/a-converted-starblast-travelscope/)。看起來蠻不錯的，所以我也用了同種設計。不過他的主鏡大小只有4 1/2"，然後我前一個望遠鏡已經是114mm口徑了，所以想做個大一點的。拿張紙算算再拿個尺比比後決定用75mm口徑，焦距150mm的主鏡。[Newt for the Web](https://stellafane.org/tm/newt-web/newt-web.html) 跟 [Diagonal Off-Axis Illumination Calculator](http://www.bbastrodesigns.com/diagonal.htm) 在算尺寸時也很有用。
 

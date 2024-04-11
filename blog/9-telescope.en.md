@@ -3,7 +3,7 @@
 
 ![](img/telescope/telescope.jpg =100%x*)
 
-I needed a project for metalwork class, so I made a telescope. I've actually made one some years back with [Prof. Wu Jiun-Huei's Telescope DIY Camp](https://www.ylib.com/scientific/activity/201311Telescopediy/index.htm), although that was basically putting together pre-made materials from an existing design. This time, I want to do the designs and size calculation.
+I needed a project for metalwork class, so I made a telescope. I've actually made one some years back with [Prof. Wu Jiun-Huei's Telescope DIY Camp](https://web.archive.org/web/20160316214002/https://www.ylib.com/scientific/activity/201311Telescopediy/index.htm), although that was basically putting together pre-made materials from an existing design. This time, I want to do the designs and size calculation.
 
 Since it's for metalwork class, the telescope would be made from metal. After some browsing around the internet, I found [this design by Gary Seronik](https://garyseronik.com/a-converted-starblast-travelscope/). The design looks pretty neat, so I'm basing mine off from his. Although this design only have a 4 1/2" primary mirror, and my previous telescope is a 114mm already, so I figured might as well make a bigger one this time. After some calculation on paper and looking at a measuring tape (so I actually know how long 1 meter is in real life), I decided to make a telescope with an aperature of 150mm and focal length of 750mm. [Newt for the Web](https://stellafane.org/tm/newt-web/newt-web.html) and [Diagonal Off-Axis Illumination Calculator](http://www.bbastrodesigns.com/diagonal.htm) was also very helpful for calculation.
 
