@@ -13,6 +13,7 @@
     --footer-height: 30px;
 
     --min-img-width: 200px;
+    --max-cover-height: 20cm;
 }
 
 html {
@@ -179,7 +180,7 @@ a:hover {
 
 #content .post img {
     width: 100%;
-    max-height: calc(var(--content-width) * 3 / 4);
+    max-height: var(--max-cover-height);
     object-fit: cover;
     object-position: center;
 }

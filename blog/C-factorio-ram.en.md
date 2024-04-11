@@ -2,6 +2,8 @@
 ## 2022-11-12 {date}
 The following is written for my WKRPT-200 report.
 
+<span style="display: none">![](img/factorio-ram/app.png)</span>
+
 [toc]
 
 <!-- {{{ Summary -->
