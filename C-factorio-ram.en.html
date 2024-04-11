@@ -1,0 +1,1059 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">Multi-port Random Access Memory in Factorio</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">Multi-port Random Access Memory in Factorio</h1>
+<h2 id="date">2022-11-12</h2>
+<p>The following is written for my WKRPT-200 report.</p>
+<p><span style="display: none"><img src="img/factorio-ram/app.png" alt="" srcset="img/factorio-ram/app.png.webp" loading="lazy"></span></p>
+<ol><li><a href="#summary">Summary</a></li><li><a href="#introduction">Introduction</a></li><li><a href="#factoriocircuitnetwork">Factorio Circuit Network</a></li><li><a href="#ramdesignconsiderations">RAM Design Considerations</a></li><li><a href="#designdetail">Design Detail</a></li><li><a href="#analysis">Analysis</a></li><li><a href="#conclusion">Conclusion</a></li><li><a href="#seccode">Memory Cell Generation Code</a></li><li><a href="#toolsused">Tools Used</a></li><li><a href="#references">References</a></li></ol>
+<!-- {{{ Summary -->
+<h2 id="summary">Summary</h2>
+<p>Factorio is a game of building and maintaining factories. It has a Turing
+complete circuit network that resembles real-life digital circuit. A multi-port
+RAM is a memory device that can be read from or written to in any order at the
+same time. This report aims to provide a design of multi-port RAM in the game
+that is easy to interface, high speed, cost efficient, and extendable.</p>
+<p>The circuit network in Factorio are made from components such as arithmetic
+combinator, decider combinator, constant combinator, and wires. These components
+carries signals, which are key-value pairs the system operates on. Combinators
+take in input signals, and output new transformed signals. These together
+creates a Turing complete system. These operations are performed synchronously
+every game tick (60 ticks per second), and dummy combinators may be needed to
+make sure two sets of signals travel through different paths arrive at the same
+time.</p>
+<p>The considerations for this RAM design includes concurrent operation -- the
+ability to read and write at the same time; operation speed -- the rate the
+input can change while maintaining normal operations; latency -- the delay from
+input being set and output being available; multi-signal support -- storing
+multiple signals on the same cell; combinator usage; and ease of construction.</p>
+<p>The design consists of individual cells linked together by 4 wires: write
+address, write data, read address, read data. Each cell contains three
+decider combinators. One with feedback input acts as the core memory storage
+with reset condition, one handles the write addressing, and one handles read
+addressing. Additional combinators can be added to provide more read ports.
+Multi-signal support can be added with the cost of <code>n+1</code> additional combinators.
+Automatic address assignment can be added with the cost of <code>n</code> additional
+combinators. <code>n</code> is the number of cells.</p>
+<p>By using the in-game debug menu and test circuit, different properties can be
+measured or characterized. The design has a read latency of 1 tick and write
+latency of 2 ticks, which are the minimum possible times using circuits.  During
+concurrent read/write, the old content is read from the cell before new data is
+written. The RAM has an operational speed of 1 change per tick, or 60 changes
+per second and is the fastest speed achievable in game.</p>
+<p>In the end, the design satisfies the objective, and is practical to use in game.
+An application example is provided in <a href="#secapp">Application Example: Train Content Tracking</a>, showing the design
+being used to keep track of train content.</p>
+<!-- }}} -->
+<!-- {{{ Introduction -->
+<h2 id="introduction">Introduction</h2>
+<p>Factorio has a circuit network system that resembles digital circuit in
+real-life. Memory storage is one of the real life device that can be implemented
+with digital circuit, and it can also be useful in the game. This report
+explores the idea of combining the two together to create a RAM in Factorio.</p>
+<h3 id="factorio">Factorio</h3>
+<p>Factorio is a game of building and maintaining factories. The players have to
+combine simple elements into ingenious structures <a href="#ref-factorio">[1]</a>. One of the
+big elements in game is a Turing complete circuit network system to help control
+and manage the factories. Most of the time, simple circuits are sufficient. But
+in a game of creativity and challenge, more complicated circuit becomes
+necessary. Figure 1 shows an example of Pong implemented in game
+<a href="#vid-pong">[2]</a>.</p>
+<p><img src="img/factorio-ram/ping.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/ping.png.webp" loading="lazy">
+</p><center>Figure 1 Pong game implemented in Factorio</center><p></p>
+<h3 id="multiportram">Multi-port RAM</h3>
+<p>Multi-port random access memory, or multi-port RAM, is a type of memory that can
+be read or written to in any order at the same time <a href="#wiki-ram">[3]</a><a href="#wiki-dpram">[4]</a>.
+Typically, there would be one write port plus one or more read ports. This type
+of memory is more complicated than simple SR-latches or counter (in fact, it
+would contain a large quantity of them). However, this added complexity allows
+it to be used in situations where individual latches don't suffice.</p>
+<h3 id="problemdefinition">Problem Definition</h3>
+<p>Factorio has a circuit network that allows player to build complicated
+behaviours in their factories. In cases, multiple of circuits networks may want
+to store and share information with each other. This storage device needs to be
+able to be written to and read from at the same time. This property is similar
+to a multi-port RAM in real-world.</p>
+<p>An in-game analogue of multi-port RAM can be constructed in game using the
+circuit network components, but it is only practical if it is</p>
+<ul>
+<li><strong>Easy to build</strong> - the design can be built anywhere with minimal work in a short time.</li>
+<li><strong>Speed</strong> - it should be as fast as possible to avoid being the bottleneck of the whole system, this includes both the operational speed and data latency.</li>
+<li><strong>Cost efficient</strong> - construction should not need excessive resources, as those are limited in game. This includes space requirement.</li>
+<li><strong>Extendable</strong> - different application requires different sizes of data to be stored. The design should be able to accommodate any size.</li>
+</ul>
+<p>The application of this device is purely in game, and there is no relative
+standard published yet either but the developer or players, an application
+example is included in <a href="#secapp">Application Example: Train Content Tracking</a> to demonstrate the practicality of
+the design.</p>
+<h3 id="objective">Objective</h3>
+<p>This report aims to provide the information on relevant game mechanics,
+definitions of design properties, considerations, and implementation detail of a
+multi-port RAM in Factorio. The end result is analyzed to ensure it satisfies
+the requirement outlined in <a href="#problem-definition">Problem Definition</a>. Other properties such as
+concurrent read-write behaviour are also characterized and documented.</p>
+<!-- }}} -->
+<!-- {{{ Factorio Circuit Network -->
+<h2 id="factoriocircuitnetwork">Factorio Circuit Network</h2>
+<p>This section describes the basic mechanics of Factorio's circuit network. More
+detailed information can be found on Factorio Wiki <a href="#wiki-circuit">[5]</a>.</p>
+<h3 id="signals">Signals</h3>
+<p>The circuit network is built around the concept of signals. Each signal has an
+identifier (represented in game as either items, single letters, single digits,
+or a colour) and a value <a href="#wiki-circuit">[5]</a>. Figure 2(a) shows the some of the
+signals in the signal selection menu. Figure 2(b) shows how the game represents the
+values of signals.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 35%; vertical-align: top"><p></p><center>(a) List of signals in the virtual signal tab</center>
+<img src="img/factorio-ram/signals.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/signals.png.webp" loading="lazy"><p></p></div>
+<div markdown="1" style="width: 30%; vertical-align: top"><p></p><center>(b) Examples of signals in game</center>
+<img src="img/factorio-ram/signals_pole.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/signals_pole.png.webp" loading="lazy"><p></p></div></div>
+<p></p><center>Figure 2 Examples of signals in game</center><p></p>
+<p>These signals carries all the states in the circuit. The signals are updated
+every game tick, which is 60 times per second. Changing the state of each signal
+in each game ticks essentially creates a sequential logic circuit
+<a href="#wiki-combtut">[6]</a>.</p>
+<h3 id="combinators">Combinators</h3>
+<p>Combinators are the core logic elements of the circuit network. There are three
+types of combinators: arithmetic, decider, and constant. Arithmetic combinator,
+as the name implies, carries out arithmetic operations on signals, including the
+4 elemental operations, exponentiation, and bitwise operations
+<a href="#wiki-arithcomb">[7]</a>; decider combinator compare signals, with operations
+equals, not equals, less than, greater than, less than or equal to, and greater
+than or equal to <a href="#wiki-decicomb">[8]</a>. Constant combinator is much easier, it
+can be configured to output a constant value on specified signals
+<a href="#wiki-constcomb">[9]</a>. Figure 3 shows the combinator menu in game
+and the available operations can be performed by arithmetic and decider
+combinators.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 40%"><p></p><center>Arithmetic combinator</center>
+<img src="img/factorio-ram/arith_comb.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/arith_comb.png.webp" loading="lazy"><p></p></div>
+<div markdown="1" style="width: 40%"><p></p><center>Decider combinator</center>
+<img src="img/factorio-ram/deci_comb.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/deci_comb.png.webp" loading="lazy"><p></p></div></div>
+<p></p><center>Figure 3 Combinators UI in game</center><p></p>
+<p>In addition, the combinators can process multiple signals at once. The
+arithmetic has a special signal called <em>Each</em>. When it is selected, the
+operation is operated on each signal independently. Similarly, the decider
+combinator has special signals <em>Each</em>, <em>Everything</em>, <em>Anything</em> that allows it
+to compare multiple signals at once <a href="#wiki-circuit">[5]</a>.</p>
+<p>These combinator are used in almost all circuit network in game, and are what
+makes the circuit system Turing complete.</p>
+<h3 id="secmob">Multiple Output Behaviour</h3>
+<p>When multiple sets of signal are output to the same wire, the values from each
+set are added together (with 0 representing empty signals) <a href="#wiki-circuit">[5]</a>.
+For example, when signal set <code>{A: 1, B: 2}</code> and <code>{A: 3, C: 4}</code> are output to
+the same wire, the input connected to that wire would read <code>{A: 4, B: 2, C:
+4}</code>. This mechanics often allows addition operation without requiring extra
+combinator, and is an important feature for many counter and timer designs.
+Figure 4 shows a simple counter design utilizing this mechanic.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 30%"><p></p><center>In game construction</center>
+<img src="img/factorio-ram/counter.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/counter.png.webp" loading="lazy">
+<center>Diagram</center>
+<span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/counter_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/counter_d.png.webp" loading="lazy">
+</span><p></p></div>
+<div markdown="1" style="width: 40%"><p></p><center>Plot of counter output</center>
+<img src="img/factorio-ram/counter_v.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/counter_v.png.webp" loading="lazy"><p></p></div></div>
+<p></p><center>Figure 4 Simple 0 to 9 counter design</center><p></p>
+<h3 id="wirecolours">Wire Colours</h3>
+<p>In the game, there are 2 colours of wires (green and red) that carries the
+signals. This allows two independent set of signals to be connected to same
+combinator input without affecting each other. Essentially, connections of each
+red and green wires form two independent circuit networks <a href="#wiki-circuit">[5]</a>.
+Figure 5 shows an example of a circuit using multiple wires. Note
+when both wires contain the same signal are connected to the input of a
+combinator, the combinator receives the sum of two signal sets as described in
+<a href="#secmob">Multiple Output Behaviour</a>.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 30%"><p></p><center>Construction</center>
+<img src="img/factorio-ram/wires.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/wires.png.webp" loading="lazy"><p></p></div>
+<div markdown="1" style="width: 25%"><p></p><center>Diagram</center>
+<span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/wires_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/wires_d.png.webp" loading="lazy">
+</span><p></p></div>
+<div markdown="1" style="width: 30%"><p></p><center>Input and output capture</center>
+<img src="img/factorio-ram/wires_v.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/wires_v.png.webp" loading="lazy"><p></p></div></div>
+<p></p><center>Figure 5 Example circuit using two wire colours</center><p></p>
+<p>Being able to connect more than one set of signals to an input provides a lot of
+freedom in terms of routing signals, and in many cases, reduces the combinators
+required in a circuit, which leads to reduced latency. However since only 2
+colours are available, it is also a constraint to consider when designing
+circuits.</p>
+<h3 id="propagationdelayandsynchronization">Propagation Delay and Synchronization</h3>
+<p>In Factorio, signal propagation through the wires are instant. However, the
+combinators have a one tick delay. This is the main source of latency in any
+circuit. This is one of the reasons why the number of combinators used should be
+minimized. The more combinators used in a signal path, the larger the latency
+is.</p>
+<p>The delays also adds another design consideration. In Factorio, signals are all
+in the same clock domain (in-game 60 ticks per second clock), and there is no
+metastability issue like real world FPGAs. But if two sets of signals goes
+through different number of combinators in their path, they would receive
+different amount of delay <a href="#wiki-combtut">[6]</a>. This property can be used to
+construct edge detectors like the one in Figure 6. When the
+constant combinator starts output a signal (set by players), the data would be
+on the green wire for one tick, then gets subtracted back to zero as the
+arithmetic combinator outputs the negated value in next tick.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 15%"><p><img src="img/factorio-ram/edge.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/edge.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 30%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/edge_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/edge_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 6 An edge detector circuit</center><p></p>
+<p>However, most of the time this desynchronization can cause undesired data to
+appear in the circuit for a few game ticks. At best case, it slows down the
+speed of the circuit; worst case the bad data propagates across the network and
+can be hard to debug.  That's why it is a common practice to add a dummy gate,
+like addition by 0, to match the timing of each circuit. Figure 7
+shows an example of such circuit.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 20%"><p><img src="img/factorio-ram/sync.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/sync.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 30%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/sync_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/sync_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 7 Example circuit of synchronizing multiple signal paths</center><p></p>
+<!-- }}} -->
+<!-- {{{ Design Considerations -->
+<h2 id="ramdesignconsiderations">RAM Design Considerations</h2>
+<p>This section defines some of the metrics and properties to be considered when
+designing the Factorio RAM.</p>
+<h3 id="concurrentoperations">Concurrent Operations</h3>
+<p>Concurrent operations specifies the ability for a RAM to be written to and read
+from at the same time. Usually there would be one port on the RAM to write to,
+and one or more ports to read from. This type of RAM is also called dual-port or
+multi-port RAM. Being able to read and write at the same time allows
+communication between a data writer and multiple independent readers. This
+property makes dual-port RAM a much more suitable memory storage in many
+situations.</p>
+<h3 id="operationspeed">Operation Speed</h3>
+<p>The operating speed is a metric of how fast the input can update while
+maintaining normal operation. The maximum speed achievable in the game is one
+update per game tick, which is 60 per second in normal settings. This speed is
+usually determined by how much desync is present in the circuit. The more
+difference there is between two signals, the more time the whole circuit needs
+for the output value to settle. This is different than FPGAs where the speed is
+usually constrained by the critical path <a href="#fpga-path">[10]</a>.</p>
+<p>Since a circuit can still take input at lower speed than its maximum, having one
+that is capable of running at maximum game speed essentially gives the input an
+unconstrained timing. This makes it much useful in situations where the input
+can be unpredictable, for example, the signal generated by individual items
+transported on a belt.</p>
+<h3 id="latency">Latency</h3>
+<p>Latency is the delay from the input being set and the output being available. In
+this RAM design, there are to metrics to measure: read latency and write
+latency.</p>
+<p>Read latency is the delay between read address being set and data being
+available at output. The best case would be a latency of 1 - data becomes
+available at the tick following the address. This can be achieved easily in most
+designs since usually there's only one decider combinator that outputs data
+based on input address.</p>
+<p>Write latency is the delay between data write and data being available at the
+reading side. It's more challenging to achieve a latency of 1 in this case,
+since minimum of one combinator is needed to latch the data, and the other one
+being the read address decider. That is, a latency of 2 would be a more
+practical latency for writing.</p>
+<p>Another important property to consider is the consistency of latency. A RAM that
+has address dependent or time dependent latency makes it hard to use. Additional
+data available signal might be required to notify the RAM user since there's no
+fixed amount of delay to wait for. In any case, a RAM with constant latency for
+each operation is a far better design than without.</p>
+<h3 id="secmss">Multi-signal Support</h3>
+<p>This is a Factorio specific property. As mentioned in <a href="#combinators">Combinators</a>,
+both types of combinators in the game supports operating on multiple signals at
+the same time. This allows RAM designs that can store multiple signals in one
+cell. It is a useful feature to have, especially when the RAM is used with the
+rest of the factory. Most of the control and status report in Factorio uses
+different signals at the same time (for example, a chest can report its content
+using the signal set <code>{iron plate: 36, copper plate: 20, coal: 10}</code>).
+If the RAM can only store one signal, its usefulness would be greatly reduced.</p>
+<p>However, the addition of multi-signal into the RAM circuit adds additional
+complexity. Since the combinators would pass all signals through itself,
+additional filters would be needed to prevent control signals from reaching
+the output, increasing the combinator usage. <a href="#secmssimpl">Variation: Multi-signal Support</a>
+describes the required design in more detail.</p>
+<h3 id="combinatorusage">Combinator Usage</h3>
+<p>This is the measurement of combinators used per cell. Memory cells are used as
+unit instead of data size, since each cell has a possibility of storing more than
+one signal as described in <a href="#secmss">Multi-signal Support</a>. This metric is important when the RAM
+circuit is scaled up. Two extra combinator used in each scale in a 100-cell RAM
+means an extra of 200 combinators are added into the design. While space and
+energy in Factorio is relatively cheap, the upscaling would eventually be
+limited by the physical computer running the game. As each combinator requires
+CPU resource to computer, minimizing the combinator count is essential for
+constructing a large circuit.</p>
+<h3 id="easeofconstruction">Ease of Construction</h3>
+<p>Factorio is a game designed for players to play. In the game, player would have
+to place all the individual combinators and wires, and configure them
+accordingly. Factorio has an excellent UI/UX for copying and mass configuring
+entities (eg., combinators) in game. This in turns causes the best design for
+construction to be one that can be easily copied. However, this can conflicts
+with other considerations, namely combinator usage. A design with the address
+if each cell preconfigured in its combinators would have a minimal combinator
+count, but each combinator would need to be configured separately. In contrary,
+a design where each cell have external address line that gets automatically
+incremented (as described in <a href="#secautoaddr">Variation: Automatic Address
+Assignment</a>) is much easier to construct, but requires one
+additional (or more, in case of multi-signal supported is needed) per cell. This
+is a design trade off that needs to be considered in each situation.</p>
+<!-- }}} -->
+<!-- {{{ Design Detail -->
+<h2 id="designdetail">Design Detail</h2>
+<p>At the top level, this RAM has one wire to carry write address, one to carry
+data input, one to carry read address, and one wire to carry data output.
+The number of read address and data output wires can be expanded at the cost of
+one combinator per pair. If having read address present on data line is not a
+concern, those two wire can be combined together. Alternatively, the read
+address wire on multiple output port can be combined if the read signal is
+different for each port.</p>
+<p>The input wire contains a write address signal <code>W</code> and a write data
+signal. In single signal mode, the signal <code>D</code> is used for write data
+signal. In multi signal mode, any set of signals that is not used for addressing
+can be data signal. Then <code>W</code> signal is present, the data is stored into
+the corresponding memory cell and becomes available to read.</p>
+<p>When the <code>R</code> signal is present in the read address wire, data from the
+corresponding cell would be available on the output data wire.</p>
+<p>The rest of the section describes the implementation detail of this design.</p>
+<h3 id="basicmemorycell">Basic Memory Cell</h3>
+<p>The most basic memory cell is one signal combinator looped back to itself. The
+input data is carried in signal <code>D</code>. The signal can only be present for
+one tick, otherwise the mechanics described in <a href="#secmob">Multiple Output Behaviour</a> would cause
+the data to multiply each tick.</p>
+<p>Figure 8 shows the in game construction and diagram of this circuit.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 15%"><p><img src="img/factorio-ram/cell.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/cell.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 25%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/cell_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/cell_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 8 Simplest memory device in Factorio</center><p></p>
+<p>An <code>R</code> signal is used as reset signal. When the signal becomes non-zero,
+the combinator gets disabled and thus the loop back stops.</p>
+<p>The rest of the RAM is designed around this basic memory circuit.</p>
+<h3 id="writeaddressing">Write Addressing</h3>
+<p>To make the memory circuit easier to use for RAM, two things need to be added:</p>
+<ol>
+<li>The stored value is cleared when new write address is asserted</li>
+<li>The new value is only held for one tick after write address is deasserted</li>
+</ol>
+<p>Figure 9 shows a circuit that achieves the requirements.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 20%"><p><img src="img/factorio-ram/write.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/write.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 30%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/write_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/write_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 9 Memory cell with write addressing</center><p></p>
+<p>Here, <code>123</code> is used as the address of this cell. When the write address
+signal <code>W</code> is set to <code>123</code> on the green wire, the memory cell
+combinator gets disabled and the address combinator becomes the driver of red
+wire. The value carried by signal <code>D</code> on the green wire would become
+available on the red wire at the next tick.</p>
+<p>When <code>W</code> signal is deasserted, the address combinator would continue to
+drive the red wire for one more tick due to its delay. This would get seen by
+the memory cell combinator as a one tick data on its red input, and the data
+would become latched on red wire as it starts to drive the red wire at next
+tick.</p>
+<p>With write addressing is added, the memory cells essentially become a addressed
+in, parallel out memory device, where other circuits can be connected to the red
+wires of each cell to access stored data.</p>
+<h3 id="readaddressing">Read Addressing</h3>
+<p>To become an actual RAM, the reading would need to be addressable as well. This
+can be achieved easily with another decider combinators.</p>
+<p>Figure 10 shows the read address combinator added to the memory cell.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 30%"><p><img src="img/factorio-ram/read.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/read.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 50%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/read_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/read_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 10 Memory cell with read addressing</center><p></p>
+<p>The mechanics of read addressing is relatively simple compared to write
+addressing. When the read signal <code>R</code> of <code>123</code> is asserted on the
+read address line, the read combinator gets activated. It then outputs the data
+latched on the red line to its output at the next tick.</p>
+<p>Multiple read address combinator can be connected to the data line to provide
+more read ports.</p>
+<h3 id="secconst">Constructing RAM from Cells</h3>
+<p>The modular memory cell approach of this design makes it easy to construct
+RAM of any size. By putting down multiple cells together and connect their input
+and output lines, these cells form a larger RAM with shared addressing and data
+line.</p>
+<p>However, with just three combinators, the address would need to be set for each
+cell individually. There is no in-game tool to sequentially assign values to
+combinators, making it a tedious process to go through if manually. Fortunately,
+Factorio has a blueprint system, which can be exported and imported from outside
+sources. With a simple Python script, the RAM can be generated and configured
+for any number of cells. This can greatly reduce the time spent on configuring a
+new RAM instance. <a href="#seccode">Memory Cell Generation Code</a> contains the code to
+generate RAM based on this 3-combinator cell design.</p>
+<p>Figure 11 shows a RAM instance of 3 cells.</p>
+<p></p><center>
+<img src="img/factorio-ram/ram.png" alt="" width="30%" height="auto" srcset="img/factorio-ram/ram.png.webp" loading="lazy"><p></p>
+<p></p></center>
+<center>Figure 11 A three-cell RAM instance</center><p></p>
+<h3 id="secmssimpl">Variation: Multi-signal Support</h3>
+<p>The above 3-combinator cell design only stores one signal, <code>D</code>. As
+mentioned in <a href="#secmss">Multi-signal Support</a>, it useful to be able to store multiple
+signals in each cell.</p>
+<p>Simply configuring each combinators to output the special <em>Everything</em>
+signal creates an issue. Without additional combinators, the write addressing
+<code>W</code> would get passed along with data and looped back to the memory cell
+combinator input, breaking the reset condition. Additionally, the data line
+would get polluted with the addressing signals. In most case, this is not a
+issue as most circuit would simply ignore the extra signals. Regardless, there
+are still ways to prevent it from happening. Figure 12 shows the
+design.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 45%"><p><img src="img/factorio-ram/mss.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/mss.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 40%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/mss_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/mss_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 12 Memory cell with multi-signal support</center><p></p>
+<p>The added arithmetic combinator on the read port is not part of the cell, only
+one is needed for the whole RAM. Its purpose is to subtract away the read
+address from the data line. When the read address is asserted on the address
+line, the decider combinator on one of the cells would enable and forward all
+its input at the next tick, including the addressing signal <code>R</code>.
+This one tick delay matches with the delay of the arithmetic decider, which
+outputs the negated address to the data line. The multi-output mechanics adds
+the two addressing signal up, resulting to a net zero and effectively filters
+out the address from data line.</p>
+<p>Same concept is applied on the write port, except each cell would require its
+own write address filter (since the data line here is not shared by all cells).</p>
+<p>With the addition of 1 combinator per cell plus one for the combined RAM, it
+makes the design more useful in Factorio application.</p>
+<h3 id="secautoaddr">Variation: Automatic Address Assignment</h3>
+<p>While writing a program that generates a RAM instance works, and can be more
+convenient than placing the combinators in game, some players might prefer a
+more vanilla way of playing. This design includes automatic address assignment
+to help constructing RAM instances without needing different configurations on
+each cell. Figure 13 shows the design.</p>
+<p>One arithmetic combinator is added to each cell. The input of this combinator is
+connected to the previous cell, and it increments the address signal,
+<code>A</code>, of that cell by one. This incremented number is used by the new cell
+as its address.</p>
+<p>Note that in this design, the write address is required to be on both data and
+address lines. This is because the limited choice of wire colours. The write
+address combinator only has 2 inputs. Since it is undesired for the address
+signal to be connected to other cells, it must be on a different input than
+incoming address and data signals. The consequence is that the write address
+must share the same line as write data. At the same time, the write data should
+not be connected to the memory combinator directly. The two constraints combined
+to require write address to be on both wires.</p>
+<p>Other than the quirk described above, this design adds one combinator to each
+cell. It is usually not a big issue, as players who prefer not to generate RAM
+instances programmatically tend to create smaller RAMs that are more manageable
+by hand. For that, one combinator per cell isn't much.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 35%"><p><img src="img/factorio-ram/auto.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/auto.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 40%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/auto_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/auto_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 13 Memory cell with automatic address assignment</center><p></p>
+<!-- }}} -->
+<!-- {{{ Analysis -->
+<h2 id="analysis">Analysis</h2>
+<p>The section includes the measurement of different properties of this RAM design.
+The tests are performed on the base design without variation, but since the two
+variations does not change the core of the RAM, the test result would be the
+same for them.</p>
+<h3 id="readlatency">Read Latency</h3>
+<p>Read latency is the time between read address assertion and read data available.
+The test setup is shown in Figure 14.
+A small electrical pole is used to probe the content of the circuit network.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 35%"><p><img src="img/factorio-ram/read_an.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/read_an.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 50%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/read_an_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/read_an_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 14 Read latency test setup</center><p></p>
+<p>The test procedure is as follows:</p>
+<ol>
+<li>Using in-game debug tool to pause the game</li>
+<li>Enable constant combinator with signal <code>R</code></li>
+<li>Progress game one tick at a time and record the change of signal</li>
+</ol>
+<p>Read latency test data
+</p><center><p></p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>address signal <code>r</code></th>
+<th>data signal <code>d</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p></p></center><p></p>
+<p>At tick 1, the address is asserted on the line, and the data becomes available
+at tick 2. The read latency is thus <code>2 - 1 = 1</code> tick.</p>
+<h3 id="writelatency">Write Latency</h3>
+<p>There are two measurements of write latency: the time between write address
+assertion and read data available with constant write data, and the time between
+write data available and read data available with constant write address. Both
+having the read address held at the same value as write address. The test setup
+is shown in Figure 15.  A small electrical pole is used to
+probe the content of the circuit network.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 30%"><p><img src="img/factorio-ram/write_an.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/write_an.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 35%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/write_an_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/write_an_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 15 Write latency test setup</center><p></p>
+<p>The test procedure is as follows:</p>
+<ol>
+<li>Enable constant combinator with signal <code>D</code></li>
+<li>Using in-game debug tool to pause the game</li>
+<li>Enable constant combinator with signal <code>W</code></li>
+<li>Progress game one tick at a time and record the change of signal</li>
+<li>Resume the game with debug tool</li>
+<li>Disable constant combinator with signal <code>D</code></li>
+<li>Pause the game again with debug tool</li>
+<li>Enable constant combinator with signal <code>D</code></li>
+<li>Progress game one tick at a time and record the change of signal</li>
+</ol>
+<p>Write latency test data
+</p><center>
+latency wrt write address<p></p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>address signal <code>W</code></th>
+<th>data signal <code>D</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>latency wrt write data</p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>address signal <code>W</code></th>
+<th>data signal <code>D</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p></p></center><p></p>
+<p>The only difference between the two tests is the starting condition. When
+testing with respect to write address, data input starts at 1 while address
+signal starts at 0; when testing with respect to data input, address starts at 1
+while data starts at 0. In both cases, the address and data input both becomes
+available at tick 1, and data output at tick 3. Note since the test setup uses
+one single electrical pole to show the circuit network content, the input data
+and output data would add together to 2 if both are being output. In both cases,
+the data signal becomes 2 at tick 3, which shows a write latency of <code>3 - 1 = 2</code>
+ticks.</p>
+<h3 id="concurrentreadwrite">Concurrent Read/Write</h3>
+<p>This test characterize the behaviour of the RAM when it's being read and written
+to at the same time on the same address. The test setup is shown in Figure 16.
+Two small electrical poles are used to probe the content of
+the circuit network.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 40%"><p><img src="img/factorio-ram/read_write_an.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/read_write_an.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 45%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/read_write_an_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/read_write_an_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 16 Concurrent read/write test setup</center><p></p>
+<p>The RAM is preloaded with the value 1, and data input <code>D</code> is held at
+value 2.</p>
+<p>The test procedure is as follows:</p>
+<ol>
+<li>Store value 1 in the RAM using <code>W</code> and <code>D</code> input</li>
+<li>Using in-game debug tool to pause the game</li>
+<li>Enable constant combinator with signal <code>W</code></li>
+<li>Enable constant combinator with signal <code>R</code></li>
+<li>Progress game one tick at a time and record the change of signal</li>
+</ol>
+<p>Concurrent read/write test data
+</p><center><p></p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>write address <code>W</code></th>
+<th>read address <code>R</code></th>
+<th>data signal <code>D</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p></p></center><p></p>
+<p>The read and write address are both asserted at tick 1. Since the read latency
+is one tick, the original data in the RAM becomes available one tick after, and
+only until two ticks after address assertion the write delay follows up and the
+output data becomes 2. Note in this test, the input data is not hooked to
+the probing electrical pole, so the addition effect of having multiple data
+output does not happen.</p>
+<p>To sum up, when read and write address are asserted at the same time, the
+original data would be available for the one following tick, then the newly
+written data takes over on the output line after.</p>
+<h3 id="operationspeed-1">Operation Speed</h3>
+<p>Operation speed is the fastest rate the input can change while still operate
+normally. Two aspects are tested: the speed of writing, and speed of reading.
+The test setup is shown in Figure 17. Two small electrical poles
+are used to probe the content of the circuit network. Two cells are used in this
+setup to test the change of addresses. The content of each cell are read off
+directly from the combinators instead of using electrical poles.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 40%"><p><img src="img/factorio-ram/speed_an.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/speed_an.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 40%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/speed_an_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/speed_an_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 17 Operation speed test setup</center><p></p>
+<p>Since the RAM is designed to operate at highest speed of one operation per tick
+(or 60 operations per second), the test is designed to verify the design works
+at this speed, rather than treating the speed as unknown.</p>
+<p>The test procedure is as follows:</p>
+<ol>
+<li>Using in-game debug tool to pause the game</li>
+<li>Enable constant combinator with signal <code>W</code> and <code>D</code></li>
+<li>Set signal <code>W</code> to 1 and signal <code>D</code> to 1</li>
+<li>Progress game by one tick and record the change of signal</li>
+<li>Set signal <code>W</code> to 2 and signal <code>D</code> to 2</li>
+<li>Progress game by one tick and record the change of signal</li>
+<li>Set signal <code>W</code> to 1 and signal <code>D</code> to 3</li>
+<li>Progress game by one tick and record the change of signal</li>
+<li>Disable constant combinator with signal <code>W</code> and <code>D</code></li>
+<li>Progress game one tick at a time and record the change of signal until output stabilizes</li>
+<li>Enable constant combinator with signal <code>R</code></li>
+<li>Set signal <code>R</code> to 1</li>
+<li>Progress game one tick at a time and record the change of signal</li>
+<li>Set signal <code>R</code> to 2</li>
+<li>Progress game one tick at a time and record the change of signal</li>
+<li>Disable constant combinator with signal <code>R</code></li>
+<li>Progress game one tick at a time and record the change of signal</li>
+</ol>
+<p>Operation speed test data
+</p><center style="overflow-x: scroll">
+write speed<p></p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>write address <code>W</code></th>
+<th>write data <code>D</code></th>
+<th>read address <code>R</code></th>
+<th>read data <code>D</code></th>
+<th>cell 0</th>
+<th>cell 1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>read speed</p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>write address <code>W</code></th>
+<th>write data <code>D</code></th>
+<th>read address <code>R</code></th>
+<th>read data <code>D</code></th>
+<th>cell 0</th>
+<th>cell 1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>10</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p></p></center><p></p>
+<p>The first section of the data represent the test on write speed. The write
+address and data are changed at maximum rate of once every tick. The data shows
+the corresponding cells latches on the correct value after one tick of input
+change (since the test data is obtained from the combinator directly, there is
+no read latency). No intermediate values are present in any time.</p>
+<p>The second section of the data represent the test on read speed, using the
+latched values from write speed test. As the read address changes at one change
+per tick, the read data signal changes correctly to output the stored values.
+Similarly, no intermediate values are present in the data output.</p>
+<p>From the data, it can be concluded that this RAM design can run at the maximum
+speed of one change per tick, or 60 changes per second in normal game setting
+without issues.</p>
+<!-- }}} -->
+<!-- {{{ Conclusion -->
+<h2 id="conclusion">Conclusion</h2>
+<p>Circuit network in Factorio is very versatile, it can use to create simple
+controls of factory to large complicated circuit. Using it to design a RAM is an
+interesting engineering challenge with multiple factors to consider. The final
+design has a minimal write latency of 2 ticks and read latency of 1 tick,
+operating at 1 cycle per tick (60 cycles per second), allowing fast read and
+write access. And with a modular design using three combinators per cell, it
+achieves easy of construction, cost efficiency and extendability. It has a
+deterministic behaviour during concurrent read-write. In addition, there are two
+additional variations that can be used depending on the requirement of
+application.</p>
+<!-- }}} -->
+<!-- {{{ Application Example -->
+<h3 id="secapp">Application Example: Train Content Tracking</h3>
+<p>This is a circuit network that can keep track of the content of individual train
+on the network. It utilizes a multi-signal variant of the RAM with multiple
+stations sharing the same wire. Figure 18 shows an overview of the
+system.</p>
+<p><img src="img/factorio-ram/app.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/app.png.webp" loading="lazy">
+</p><center>Figure 18 Train content tracking</center><p></p>
+<p>Each train in the system has one slot reserved for fish as identification. The
+amount of fish in the train sets the address in the RAM that would store the
+content. Figure 19 shows the content in one of the train wagons.</p>
+<p></p><center>
+<img src="img/factorio-ram/train.png" alt="" width="50%" height="auto" srcset="img/factorio-ram/train.png.webp" loading="lazy"><p></p>
+<p></p></center>
+<center>Figure 19 Content in one of the trains</center><p></p>
+<p>Alternatively, the station can be configured to output a unique train ID to the
+connected network. However, this train ID is more volatile and can change on its
+own when the train configuration changes (eg., adding a wagon or having a wagon
+destroyed from collision). Using a slot to manually set an ID is more reliable
+at the cost of less capacity.</p>
+<p>Each station is set to read the train content. The data is first passed through
+a falling edge detector then sent to the global network. This provides a single
+tick of address + data on the network to be used by the RAM. Figure
+20 shows the edge detector used by each station.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 30%"><p><img src="img/factorio-ram/train_filt.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/train_filt.png.webp" loading="lazy"></p></div>
+<div markdown="1" style="width: 35%"><p><span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/train_filt_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/train_filt_d.png.webp" loading="lazy">
+</span></p></div></div>
+<p></p><center>Figure 20 Edge detector on each station</center><p></p>
+<p>The global network connects all the stations to the central RAM. The RAM is a
+multi-signal variation without automatic address assignment. Since the train can
+carry more than one type of items, it is necessary to store multiple signals in
+the RAM. This would make address assignment circuit too bulky to be constructed,
+especially when the amount of cell is pretty low, with just one cell per train.</p>
+<p>The fish signal is filtered out and converted to <code>W</code> write address
+signal. This conversion is required because the RAM requires write address and
+data to come from separate wires. Since the conversion from fish to <code>D</code>
+does not destroy the original signal, this have an added effect of storing the
+fish signal together with the other data. An extra add-zero combinator is used
+alongside to match the delay of this address conversion. Figure
+21 shows the conversion and delay circuit.</p>
+<p>Once stored in the RAM, the train ID can then be selected using a constant
+combinator and be viewed from an electric pole. Figure 21
+shows the reading from central RAM of this system.</p>
+<div markdown="1" class="subfig"><div markdown="1" style="width: 35%; vertical-align: top"><p></p><center>Address filtering and conversion</center>
+<span style="filter: invert(0.87) hue-rotate(180deg)">
+<img src="img/factorio-ram/train_ram_d.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/train_ram_d.png.webp" loading="lazy">
+</span><p></p></div>
+<div markdown="1" style="width: 35%; vertical-align: top"><p></p><center>Central RAM outputting content from train 1</center>
+<img src="img/factorio-ram/train_ram.png" alt="" width="100%" height="auto" srcset="img/factorio-ram/train_ram.png.webp" loading="lazy"><p></p></div></div>
+<p></p><center>Figure 21 Central RAM of the system</center><p></p>
+<p>This system is not the most useful thing too build in the game, as there is
+seldom the need to keep track of the content of each train individually.
+However, it is still an interesting build to add to the factory for the fun and
+challenge. If used in a busy situation, where multiple trains can leave in the
+same tick, a arbitration system would also be added, but it is out of scope of
+this report.</p>
+<p>The full blueprint string of this example is included in <a href="#section_bp">Train Content Tracking
+Blueprint</a>.
+The code can be imported into Factorio to recreate the build
+and see the system running in action.</p>
+<!-- }}} -->
+<!-- {{{ Train BP -->
+<h3 id="sectrain_bp">Train Content Tracking Blueprint</h3>
+<pre><code class="hljs text language-text">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
+</code></pre>
+<!-- }}} -->
+<!-- {{{ Code -->
+<h2 id="seccode">Memory Cell Generation Code</h2>
+<p>The following is the code used to generate RAM instance as described in <a href="#secconst">Constructing RAM from Cells</a>.</p>
+<pre><code class="hljs python language-python"><span class="hljs-keyword">import</span> sys, copy, json, base64, zlib
+
+start = <span class="hljs-number">1</span>
+count = <span class="hljs-number">10</span>
+
+bp_template={<span class="hljs-string">'blueprint'</span>:{<span class="hljs-string">'icons'</span>:[{<span class="hljs-string">'signal'</span>:{<span class="hljs-string">'type'</span>:<span class="hljs-string">'item'</span>,<span class="hljs-string">'name'</span>:
+  <span class="hljs-string">'decider-combinator'</span>},<span class="hljs-string">'index'</span>:<span class="hljs-number">1</span>}],<span class="hljs-string">'entities'</span>:[],<span class="hljs-string">'item'</span>:<span class="hljs-string">'blueprint'</span>,
+  <span class="hljs-string">'version'</span>:<span class="hljs-number">281479275675648</span>}}
+
+entity_template=[{<span class="hljs-string">'entity_number'</span>:<span class="hljs-number">4</span>,<span class="hljs-string">'name'</span>:<span class="hljs-string">'decider-combinator'</span>,
+  <span class="hljs-string">'position'</span>:{<span class="hljs-string">'x'</span>:-<span class="hljs-number">8.5</span>,<span class="hljs-string">'y'</span>:-<span class="hljs-number">28</span>},<span class="hljs-string">'direction'</span>:<span class="hljs-number">4</span>,<span class="hljs-string">'control_behavior'</span>:{
+    <span class="hljs-string">'decider_conditions'</span>:{<span class="hljs-string">'first_signal'</span>:{<span class="hljs-string">'type'</span>:<span class="hljs-string">'virtual'</span>,<span class="hljs-string">'name'</span>:
+    <span class="hljs-string">'signal-W'</span>},<span class="hljs-string">'constant'</span>:<span class="hljs-number">123</span>,<span class="hljs-string">'comparator'</span>:<span class="hljs-string">'='</span>,<span class="hljs-string">'output_signal'</span>:{<span class="hljs-string">'type'</span>:
+    <span class="hljs-string">'virtual'</span>,<span class="hljs-string">'name'</span>:<span class="hljs-string">'signal-D'</span>},<span class="hljs-string">'copy_count_from_input'</span>:<span class="hljs-literal">True</span>}},
+  <span class="hljs-string">'connections'</span>:{<span class="hljs-string">'1'</span>:{<span class="hljs-string">'red'</span>:[{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">1</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>},{
+    <span class="hljs-string">'entity_id'</span>:<span class="hljs-number">7</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>}],<span class="hljs-string">'green'</span>:[{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">5</span>,
+  <span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>}]},<span class="hljs-string">'2'</span>:{<span class="hljs-string">'red'</span>:[{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">5</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">2</span>}]}
+  }},{<span class="hljs-string">'entity_number'</span>:<span class="hljs-number">5</span>,<span class="hljs-string">'name'</span>:<span class="hljs-string">'decider-combinator'</span>,<span class="hljs-string">'position'</span>:{<span class="hljs-string">'x'</span>:
+  -<span class="hljs-number">7.5</span>,<span class="hljs-string">'y'</span>:-<span class="hljs-number">28</span>},<span class="hljs-string">'direction'</span>:<span class="hljs-number">4</span>,<span class="hljs-string">'control_behavior'</span>:{<span class="hljs-string">'decider_conditions'</span>:
+  {<span class="hljs-string">'first_signal'</span>:{<span class="hljs-string">'type'</span>:<span class="hljs-string">'virtual'</span>,<span class="hljs-string">'name'</span>:<span class="hljs-string">'signal-W'</span>},<span class="hljs-string">'constant'</span>:<span class="hljs-number">123</span>,
+  <span class="hljs-string">'comparator'</span>:<span class="hljs-string">'\u2260'</span>,<span class="hljs-string">'output_signal'</span>:{<span class="hljs-string">'type'</span>:<span class="hljs-string">'virtual'</span>,<span class="hljs-string">'name'</span>:
+  <span class="hljs-string">'signal-D'</span>},<span class="hljs-string">'copy_count_from_input'</span>:<span class="hljs-literal">True</span>}},<span class="hljs-string">'connections'</span>:{<span class="hljs-string">'1'</span>:{
+    <span class="hljs-string">'red'</span>:[{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">5</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">2</span>}],<span class="hljs-string">'green'</span>:[{<span class="hljs-string">'entity_id'</span>:
+    <span class="hljs-number">4</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>},{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">8</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>}]},<span class="hljs-string">'2'</span>:{<span class="hljs-string">'red'</span>:
+  [{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">5</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>},{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">4</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">2</span>},{
+    <span class="hljs-string">'entity_id'</span>:<span class="hljs-number">6</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>}]}} },{<span class="hljs-string">'entity_number'</span>:<span class="hljs-number">6</span>,<span class="hljs-string">'name'</span>:
+  <span class="hljs-string">'decider-combinator'</span>,<span class="hljs-string">'position'</span>:{<span class="hljs-string">'x'</span>:-<span class="hljs-number">6.5</span>,<span class="hljs-string">'y'</span>:-<span class="hljs-number">28</span>},<span class="hljs-string">'direction'</span>:<span class="hljs-number">4</span>,
+  <span class="hljs-string">'control_behavior'</span>:{<span class="hljs-string">'decider_conditions'</span>:{<span class="hljs-string">'first_signal'</span>:{<span class="hljs-string">'type'</span>:
+  <span class="hljs-string">'virtual'</span>,<span class="hljs-string">'name'</span>:<span class="hljs-string">'signal-R'</span>},<span class="hljs-string">'constant'</span>:<span class="hljs-number">123</span>,<span class="hljs-string">'comparator'</span>:<span class="hljs-string">'='</span>,
+  <span class="hljs-string">'output_signal'</span>:{<span class="hljs-string">'type'</span>:<span class="hljs-string">'virtual'</span>,<span class="hljs-string">'name'</span>:<span class="hljs-string">'signal-D'</span>},
+  <span class="hljs-string">'copy_count_from_input'</span>:<span class="hljs-literal">True</span>}},<span class="hljs-string">'connections'</span>:{<span class="hljs-string">'1'</span>:{<span class="hljs-string">'red'</span>:[{
+    <span class="hljs-string">'entity_id'</span>:<span class="hljs-number">5</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">2</span>}],<span class="hljs-string">'green'</span>:[{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">9</span>,
+  <span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">1</span>}]},<span class="hljs-string">'2'</span>:{<span class="hljs-string">'green'</span>:[{<span class="hljs-string">'entity_id'</span>:<span class="hljs-number">9</span>,<span class="hljs-string">'circuit_id'</span>:<span class="hljs-number">2</span>}]}} }]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">encode_bp</span>(<span class="hljs-params">data</span>):
+   j = json.dumps(data)
+   z = zlib.compress(j.encode(<span class="hljs-string">'utf-8'</span>), level=<span class="hljs-number">9</span>)
+   b = base64.b64encode(z).decode(<span class="hljs-string">'utf-8'</span>)
+   <span class="hljs-keyword">return</span> <span class="hljs-string">'0'</span> + b
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">decode_bp</span>(<span class="hljs-params">bp</span>):
+   b = base64.b64decode(bp[<span class="hljs-number">1</span>:])
+   z = zlib.decompress(b)
+   j = json.loads(z)
+   <span class="hljs-keyword">return</span> j
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">generate</span>():
+  entities = []
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, count):
+    <span class="hljs-keyword">for</span> templ <span class="hljs-keyword">in</span> entity_template:
+      entity = copy.deepcopy(templ)
+      entity[<span class="hljs-string">'entity_number'</span>] += (i-<span class="hljs-number">1</span>) * <span class="hljs-number">3</span>
+      entity[<span class="hljs-string">'position'</span>][<span class="hljs-string">'y'</span>] += (i-<span class="hljs-number">1</span>) * <span class="hljs-number">2</span>
+
+      cond = entity.get(<span class="hljs-string">'control_behavior'</span>, {}).get(<span class="hljs-string">'decider_conditions'</span>, {})
+      <span class="hljs-keyword">if</span> cond[<span class="hljs-string">'constant'</span>] == <span class="hljs-number">123</span>:
+        cond[<span class="hljs-string">'constant'</span>] = start + i
+
+      <span class="hljs-keyword">for</span> conn <span class="hljs-keyword">in</span> entity[<span class="hljs-string">'connections'</span>].values():
+        <span class="hljs-keyword">for</span> wire <span class="hljs-keyword">in</span> conn.values():
+          <span class="hljs-keyword">for</span> wire_conn <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(wire):
+            wire_conn[<span class="hljs-string">'entity_id'</span>] += (i-<span class="hljs-number">1</span>) * <span class="hljs-number">3</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> (<span class="hljs-number">0</span> &lt; wire_conn[<span class="hljs-string">'entity_id'</span>] &lt;= count * <span class="hljs-number">3</span>):
+              wire.remove(wire_conn)
+
+      entities.append(entity)
+
+  bp = copy.deepcopy(bp_template)
+  bp[<span class="hljs-string">'blueprint'</span>][<span class="hljs-string">'entities'</span>] = entities
+
+  <span class="hljs-keyword">return</span> bp
+
+<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(sys.argv) &gt; <span class="hljs-number">2</span>:
+  start = <span class="hljs-built_in">int</span>(sys.argv[<span class="hljs-number">1</span>])
+  count = <span class="hljs-built_in">int</span>(sys.argv[<span class="hljs-number">2</span>])
+<span class="hljs-keyword">elif</span> <span class="hljs-built_in">len</span>(sys.argv) &gt; <span class="hljs-number">1</span>:
+  start = <span class="hljs-number">0</span>
+  count = <span class="hljs-built_in">int</span>(sys.argv[<span class="hljs-number">1</span>])
+<span class="hljs-keyword">else</span>:
+  <span class="hljs-built_in">print</span>(<span class="hljs-string">f"<span class="hljs-subst">{sys.argv[<span class="hljs-number">0</span>]}</span> [offset] &lt;count&gt;"</span>, file=sys.stderr)
+  sys.exit(<span class="hljs-number">1</span>)
+
+<span class="hljs-built_in">print</span>(encode_bp(generate()))
+</code></pre>
+<!-- }}} -->
+<!-- {{{ Tools Used -->
+<h2 id="toolsused">Tools Used</h2>
+<ul>
+<li>Combinator Graph Generator, by sparr. <a href="https://mods.factorio.com/mod/combinatorgraph" rel="noopener noreferrer" target="_blank">https://mods.factorio.com/mod/combinatorgraph</a></li>
+<li>Time Series Graphs fixfor110, by Nes_p. <a href="https://mods.factorio.com/mod/timeseries_fixfor110" rel="noopener noreferrer" target="_blank">https://mods.factorio.com/mod/timeseries_fixfor110</a></li>
+<li>Circuit HUD V2, by Xiomax. <a href="https://mods.factorio.com/mod/CircuitHUD-V2" rel="noopener noreferrer" target="_blank">https://mods.factorio.com/mod/CircuitHUD-V2</a></li>
+</ul>
+<!-- }}} -->
+<!-- {{{ Reference -->
+<h2 id="references">References</h2>
+<ol markdown="1" class="reference"><p></p><li id="ref-factorio"> Factorio. Accessed: 2022/07/31. Available: <a href="https://factorio.com/" rel="noopener noreferrer" target="_blank">https://factorio.com/</a></li>
+<li id="vid-pong"> Pong in Factorio. Accessd: 2022/07/31. Available: <a href="https://youtu.be/o9FDzlpUQuM" rel="noopener noreferrer" target="_blank">https://youtu.be/o9FDzlpUQuM</a></li>
+<li id="wiki-ram"> Random-access memory, Wikipedia. Accessed: 2022/07/31. Available: <a href="https://en.wikipedia.org/wiki/Random-access_memory" rel="noopener noreferrer" target="_blank">https://en.wikipedia.org/wiki/Random-access_memory</a></li>
+<li id="wiki-dpram"> Dual-ported RAM, Wikipedia. Accessed: 2022/07/31. Available: <a href="https://en.wikipedia.org/wiki/Dual-ported_RAM" rel="noopener noreferrer" target="_blank">https://en.wikipedia.org/wiki/Dual-ported_RAM</a></li>
+<li id="wiki-circuit"> Circuit network, Factorio Wiki. Accessed: 2022/07/31. Available: <a href="https://wiki.factorio.com/Circuit_network" rel="noopener noreferrer" target="_blank">https://wiki.factorio.com/Circuit_network</a></li>
+<li id="wiki-combtut"> Tutorial:Combinator tutorial, Factorio Wiki. Accessed: 2022/07/31. Available: <a href="https://wiki.factorio.com/Tutorial:Combinator_tutorial" rel="noopener noreferrer" target="_blank">https://wiki.factorio.com/Tutorial:Combinator_tutorial</a></li>
+<li id="wiki-arithcomb"> Arithmetic Combinator, Factorio Wiki. Accessed: 2022/07/31. Available: <a href="https://wiki.factorio.com/Arithmetic_combinator" rel="noopener noreferrer" target="_blank">https://wiki.factorio.com/Arithmetic_combinator</a></li>
+<li id="wiki-decicomb"> Decider Combinator, Factorio Wiki. Accessed: 2022/07/31. Available: <a href="https://wiki.factorio.com/Decider_combinator" rel="noopener noreferrer" target="_blank">https://wiki.factorio.com/Decider_combinator</a></li>
+<li id="wiki-constcomb"> Constant Combinator, Factorio Wiki. Accessed: 2022/07/31. Available: <a href="https://wiki.factorio.com/Constant_combinator" rel="noopener noreferrer" target="_blank">https://wiki.factorio.com/Constant_combinator</a></li>
+<li id="fpga-path"> The Why and How of Pipelining in FPGAs, Sneha H.L., 2018/02/15. Accessed: 2022/08/01. Available: <a href="https://www.allaboutcircuits.com/technical-articles/why-how-pipelining-in-fpga/" rel="noopener noreferrer" target="_blank">https://www.allaboutcircuits.com/technical-articles/why-how-pipelining-in-fpga/</a></li><p></p></ol>
+<!-- }}} -->
+<!-- vim: foldmethod=marker textwidth=80 spell: --></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>English</li>
+            <li>
+                <a href="C-factorio-ram.zh-TW.html">
+                    繁體中文
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>

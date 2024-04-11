@@ -1,0 +1,115 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">Remote Controlled Car using ESP32</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">Remote Controlled Car using ESP32</h1>
+<h2 id="date">2021-02-22</h2>
+<p>Because of COVID break, I got some time at home for a project before school
+started. So I wanted to remake the <a href="6-arduino-car.en.html" rel="noopener noreferrer" target="_blank">Arduino Car</a> I made
+previously.</p>
+<p><img src="img/espcar.jpg" alt="" width="100%" height="auto" srcset="img/espcar.jpg.webp" loading="lazy"></p>
+<p>The main change I wanted to do were:</p>
+<ul>
+<li>Lower video latency</li>
+<li>Add voice streaming (didn't finish this one)</li>
+<li>Custom designed circuit that combines motor driver, audio amplifier, and power supply into one.</li>
+</ul>
+<p>I'm using ESP32 for this project again because I like it. The builtin wifi is
+very useful, and the ESP-IDF framework provides a lot of programs to use.  The
+ESP32-CAM board I'm using also comes with a camera, which suites this project
+even better.</p>
+<p></p><center>
+<img src="img/espcar-sch.png" alt="" width="100%" height="auto" srcset="img/espcar-sch.png.webp" loading="lazy"><p></p>
+<p>Schematics of the board.
+</p></center><p></p>
+<p>Because I wanted to stream audio with this, I needed to do some modifications
+to ESP32-CAM board to free up availabel ADC pins. I removed an on-board LED,
+and tied camera power pin to be always-on to free up GPIO32 and GPIO33.
+(Although I didn't end up using them because there wasn't enough time to get
+audio to work.)</p>
+<p>Other than that, the rest is just connecting IO pins to different components.
+The circuit is assembled on a perfboard which is pretty straight forward. The
+routing is a little messy but it's not too bad.</p>
+<p>I tested the audio circuit on a breadboard before putting them onto the
+perfboard and it was amplifying the signal just fine, with around 1V
+peak-to-peak.  But for some reason I wasn't able to detect the signal after
+soldering them on. By then I only got a few days before I fly out again, so I
+wanted to focus on getting the software part done first.</p>
+<p>The motors are driven by L293D, controlled using MCPWM library from ESP-IDF.</p>
+<p>The whole circuit is hold up by a 3D printed mount I made in
+<a href="https://www.freecadweb.org/index.php" rel="noopener noreferrer" target="_blank">FreeCAD</a>. I avoided using Solidworks
+because of it locking me out of my own files before when I was <a href="/9-telescope.en.html" rel="noopener noreferrer" target="_blank">making my
+telescope</a>. I also made a pair of "ears" for microphones
+to go in, but they didn't get used in the end because I didn't have time to get
+the audio working.</p>
+<p></p><center>
+<img src="img/car-freecad.png" alt="" width="100%" height="auto" srcset="img/car-freecad.png.webp" loading="lazy"><p></p>
+<p>FreeCAD model
+</p></center><p></p>
+<p>The firmware has to main components: a camera task that grabs the camera
+framebuffer send it over wifi, and a control task that receives commands from
+wifi and drives the motors. Both tasks are managed by FreeRTOS that came with
+ESP-IDF framework. I'm using UDP to send the data and commands, since it's
+easier to deal with datagram based protocol, plus it has less latency than TCP
+especially with wifi (I do wish SCTP is more popular though, it would've been
+useful for this project if it weren't unsupported by LWIP).</p>
+<p>For the video feed, the reliability of each frame doesn't really matter as
+having a few frames missing or corrupted is fine for a video. I was able to
+pipe a stream of JPEGs (using JPEG because the camera chip supports it, and it
+is compressed, allowing higher FPS) into ffplay and had it play the stream.</p>
+<p></p><center><p></p>
+<iframe width="560" height="315" style="width: 100%" src="https://www.youtube.com/embed/SgkToEtFtQo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+<p>Video stream over UDP packets.
+</p></center><p></p>
+<p>For the control, I made a simple mechanism to ensure the car is in the expected
+state. Basically the firmware would send its current state to the remote
+controller in an interval, and the controller would send commands back if the
+state differs from the expected one. A watchdog-like timer is used to stop all
+motions when no packets is received from the controller for some time. This
+approach isn't the most efficient traffic wise, but it works in a LAN where not
+much other traffic is transmitted, but it's pretty simple way to get reliable
+delivery over UDP.</p>
+<p>Lastly, the remote controller program was a simple Python program I rigged up
+quickly on the last day. Python has a lot of packages that makes it really easy
+to quickly write a program to do a task. For the controller, <code>socket</code>, <code>struct</code>,
+<code>subprocess</code> provides all the functionality to connect to the car and stream
+video to ffplay; the <code>pynput</code> package allows it to listen to mouse and keyboard
+without needing a GUI framework or a game engine; and <code>dnspython</code> makes it easy
+to find the car on the network through MDNS. So all I needed to do is write code
+that glues all of them together to get a working controller. It's not the
+fanciest control program out there, but it's simple and it works.</p>
+<p>One big problem of the design is the use of linear regulators. It turns out wifi
+uses a lot of power (a few hundred mA), and converting 8V battery power into
+3.3V using a linear regulator at this much current generates a lot of heat and
+wastes power. Because of this, I didn't attach a servo to the final design.
+Next time I'll use a switching regulator instead.</p>
+<p>But in the end, I got a working car before the deadline, and it has a much lower
+latency compared to the Android + Arduino Car I did before, so I'm happy.</p>
+<p>The code, schematic, and 3D models of the project is on <a href="https://github.com/Rio6/ESPCar" rel="noopener noreferrer" target="_blank">Github</a>.</p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>English</li>
+            <li>
+                <a href="B-esp32-car.zh-TW.html">
+                    繁體中文
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>

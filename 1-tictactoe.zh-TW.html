@@ -1,0 +1,148 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">圈圈叉叉</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">圈圈叉叉</h1>
+<h2 id="date">2015-07-24</h2>
+<p>這是一個可以跟AI對戰的android app  </p>
+<p>部份程式碼</p>
+<pre><code class="hljs java language-java"><span class="hljs-keyword">package</span> rio.tic_tac_toe;
+
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+
+<span class="hljs-keyword">import</span> android.widget.Button;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AI</span> {
+
+    Button[] btns;
+
+    AI(Button[] btns){
+        <span class="hljs-built_in">this</span>.btns = btns;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getAiMove</span><span class="hljs-params">()</span>{
+        Object[][] s = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[<span class="hljs-number">3</span>][<span class="hljs-number">2</span>];
+
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">h</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; h &lt; <span class="hljs-number">2</span>; h++){
+            <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">8</span>; i++){
+
+                <span class="hljs-keyword">switch</span>(i){
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">0</span>:
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>:
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = btns[i * <span class="hljs-number">3</span>].getText().toString();
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] = btns[i * <span class="hljs-number">3</span> + <span class="hljs-number">1</span>].getText().toString();
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>] = btns[i * <span class="hljs-number">3</span> + <span class="hljs-number">2</span>].getText().toString();
+
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>] = i * <span class="hljs-number">3</span>;
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] = i * <span class="hljs-number">3</span> + <span class="hljs-number">1</span>;
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>] = i * <span class="hljs-number">3</span> + <span class="hljs-number">2</span>;
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>:
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">4</span>:
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">5</span>:
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = btns[i - <span class="hljs-number">3</span>].getText().toString();
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] = btns[i].getText().toString();
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>] = btns[i + <span class="hljs-number">3</span>].getText().toString();
+
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>] = i - <span class="hljs-number">3</span>;
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] = i;
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>] = i + <span class="hljs-number">3</span>;
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">6</span>:
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = btns[<span class="hljs-number">0</span>].getText().toString();
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] = btns[<span class="hljs-number">4</span>].getText().toString();
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>] = btns[<span class="hljs-number">8</span>].getText().toString();
+
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>] = <span class="hljs-number">0</span>;
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] = <span class="hljs-number">4</span>;
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>] = <span class="hljs-number">8</span>;
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">7</span>:
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = btns[<span class="hljs-number">2</span>].getText().toString();
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] = btns[<span class="hljs-number">4</span>].getText().toString();
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>] = btns[<span class="hljs-number">6</span>].getText().toString();
+
+                        s[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>] = <span class="hljs-number">2</span>;
+                        s[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] = <span class="hljs-number">4</span>;
+                        s[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>] = <span class="hljs-number">6</span>;
+                        <span class="hljs-keyword">break</span>;
+                }
+
+                <span class="hljs-type">String</span> <span class="hljs-variable">t</span> <span class="hljs-operator">=</span> h == <span class="hljs-number">0</span> ? <span class="hljs-string">"X"</span> : <span class="hljs-string">"O"</span>;
+                <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">j</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;j &lt; <span class="hljs-number">3</span>; j++){
+                    <span class="hljs-keyword">if</span>(s[j][<span class="hljs-number">0</span>] == t &amp;&amp; s[(j + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>][<span class="hljs-number">0</span>] == t &amp;&amp; s[(j + <span class="hljs-number">2</span>) % <span class="hljs-number">3</span>][<span class="hljs-number">0</span>] == <span class="hljs-string">""</span>){
+                        <span class="hljs-keyword">return</span> (Integer) s[(j + <span class="hljs-number">2</span>) % <span class="hljs-number">3</span>][<span class="hljs-number">1</span>];
+                    }
+                }
+            }
+        }
+
+        <span class="hljs-type">boolean</span>[] isEmpty = <span class="hljs-keyword">new</span> <span class="hljs-title class_">boolean</span>[<span class="hljs-number">9</span>];
+
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; btns.length; i++){
+            <span class="hljs-keyword">if</span>(btns[i].getText().toString() == <span class="hljs-string">""</span>)
+                isEmpty[i] = <span class="hljs-literal">true</span>;
+        }
+        <span class="hljs-keyword">if</span>(isEmpty[<span class="hljs-number">4</span>])
+            <span class="hljs-keyword">return</span> <span class="hljs-number">4</span>;
+
+        <span class="hljs-type">int</span>[] r = getRandomVerse(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>);
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; r.length; i++){
+            <span class="hljs-keyword">if</span>(isEmpty[r[i]])
+                <span class="hljs-keyword">return</span> r[i];
+        }
+
+        <span class="hljs-keyword">for</span>(;;){
+            <span class="hljs-type">int</span> <span class="hljs-variable">rdmsel</span> <span class="hljs-operator">=</span> (<span class="hljs-type">int</span>)(Math.random() * <span class="hljs-number">4</span>);
+            <span class="hljs-keyword">if</span>(isEmpty[rdmsel * <span class="hljs-number">2</span> + <span class="hljs-number">1</span>])
+                <span class="hljs-keyword">return</span> rdmsel * <span class="hljs-number">2</span> +<span class="hljs-number">1</span>;
+        }
+
+    }
+
+    <span class="hljs-type">int</span>[] getRandomVerse(<span class="hljs-type">int</span>... i){
+        ArrayList&lt;Integer&gt; al = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;Integer&gt;(i.length);
+        <span class="hljs-type">int</span>[] a = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[i.length];
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">h</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; h &lt; i.length; h++){
+            al.add(i[h]);
+        }
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">h</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; h &lt; a.length; h++){
+            a[h] = al.remove((<span class="hljs-type">int</span>)(Math.random() * al.size()));
+        }
+        <span class="hljs-keyword">return</span> a;
+    }
+
+}
+</code></pre>
+<p><a href="https://www.dropbox.com/sh/h0vybn9ghzw9umn/AAAnxnQmMFLcClSiAiVLj9pHa?dl=0" rel="noopener noreferrer" target="_blank">Dropbox</a></p>
+<p><img src="img/tictactoe_00000.png" alt="" width="40%" height="auto" srcset="img/tictactoe_00000.png.webp" loading="lazy">
+<img src="img/tictactoe_00001.png" alt="" width="40%" height="auto" srcset="img/tictactoe_00001.png.webp" loading="lazy">
+<img src="img/tictactoe_00002.png" alt="" width="60%" height="auto" srcset="img/tictactoe_00002.png.webp" loading="lazy"></p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>繁體中文</li>
+            <li>
+                <a href="1-tictactoe.en.html">
+                    English
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>
