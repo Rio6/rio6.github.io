@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -r dist/",
     "build": "node build.js && ./copyres.sh",
-    "watch": "NODE_ENV=development concurrently \"nodemon -e 'md css html js' -w . -i dist -x 'npm run build'\" \"simplehttpserver dist\""
+    "watch": "NODE_ENV=development concurrently \"nodemon -e 'md css html js' -w . -i dist -x 'npm run build'\" \"simplehttpserver dist > /dev/null\""
   },
   "author": "Rio6",
   "dependencies": {
@@ -14,6 +14,7 @@
     "jsdom": "^16.2.2",
     "showdown": "^1.9.1",
     "showdown-highlight": "^3.1.0",
+    "showdown-katex": "^0.8.0",
     "showdown-toc": "^1.0.1"
   },
   "devDependencies": {

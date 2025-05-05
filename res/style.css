@@ -223,3 +223,19 @@ ol.reference > li::before {
     content: '[' counter(step-counter) ']';
     margin-right: 10px;
 }
+
+#content li {
+    margin-bottom: 5px;
+}
+
+.katex-html {
+    display: none;
+}
+
+.katex-display {
+    display: block;
+    width: 100%;
+    text-align: center;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}

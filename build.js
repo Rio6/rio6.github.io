@@ -6,6 +6,7 @@ const {JSDOM} = require('jsdom');
 const showdown = require('showdown');
 const showdownHighlight = require('showdown-highlight');
 const showdownToc = require('showdown-toc');
+const showdownKatex = require('showdown-katex');
 
 const READ_DIR = './blog';
 const WRITE_DIR = './dist';
@@ -51,7 +52,7 @@ const converter = new showdown.Converter({
     parseImgDimensions: true,
     openLinksInNewWindow: true,
     tables: true,
-    extensions: [showdownToc(), showdownHighlight()],
+    extensions: [showdownToc(), showdownHighlight(), showdownKatex()],
 });
 
 let template = fs.readFileSync(TEMPLATE, 'utf-8');

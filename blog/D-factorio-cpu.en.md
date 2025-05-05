@@ -632,7 +632,6 @@ way, the register is cleared when the value is read. The constant combinator `W
 ⇐ 1000` is used to set the address of the register.
 
 <!-- }}} -->
-<!-- }}} -->
 
 ### Assembler
 The purpose of an assembler is to takes a list of human readable instructions
@@ -756,7 +755,6 @@ Table 3 List of Data Source
 | `dec`     | Decrement                                        | Same as above                                                                                                                    |
 
 </center>
-<!-- }}} -->
 <!-- }}} -->
 
 <!-- {{{ Tools Used -->
