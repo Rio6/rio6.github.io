@@ -2,13 +2,11 @@ name: Github Pages
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build-and-deploy:
-
     runs-on: ubuntu-latest
 
     strategy:
