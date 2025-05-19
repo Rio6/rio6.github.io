@@ -1,6 +1,6 @@
 # Line Following Robot {title}
 ## 2024-04-29 {date}
-![banner](img/line-follower/S&R2.png =100%x*)
+![banner](img/line-follower/banner.png =100%x*)
 ## Overview
 In the third year of university, we have a design project course that lets us build a physical project that competes with some given task. For my year, the task is to build a robot that "rescues" a LEGO figure from the center of the course and put it in one of the safe zones (green boxes or the start). The course has a line marked by red tape that the robot must follow.
 
@@ -107,8 +107,9 @@ An external DC-DC buck converter was used to supply the 5V rail used by the LED 
 The design of Pololu's motor encoder had its connection points perfectly sit flat when the motor was installed. This allowed the motor to be directly soldered to the PCB chasis without any wire, and we did not have to worry about wire connection coming lose over time. The solder blobs could interfere with the optical teeth if they were too big, but it was easily fixed by removing excess solder. The distance between the disk and the optical sensor was a bit tricky to get right. But once it was setup it was working pretty well.
 
 <center>
-![soldered motor encoder](img/line-follower/encoder.jpg =36%x*)
-![final robot](img/line-follower/final-bot.jpg =46%x*)
+![soldered motor encoder](img/line-follower/encoder.jpg =35%x*)
+![final robot](img/line-follower/final-bot.jpg =45%x*)<br/>
+Soldered-on Motor and Overall Assembly
 </center>
 
 ## UART Bluetooth and Command Interface
@@ -133,7 +134,7 @@ Heading Lock Test using Min-Max Normalization
 </center>
 
 To try to improve the magnetometer accuracy, I found [this paper](RI_magnetometer.pdf) that uses least-squares fit on an ellipsoid for magnetometer calibration. The paper shows a few methods for calibrating 3D magnetic field measurement, I adopted the first method for both soft and hard iron calibration into a 2D case, as the robot only rotates around a single axis. Note that the equation for $$\hat A$$ in the paper is wrong, it should be $$\hat A = \left(\hat V^T \hat M \hat V - \hat d\right)^{-1} \hat M$$ according to its citation [1, eq. (5)] from Markovsky, et al. For more, we can reduce equation (3) to $$x^TM\_dx + b\_d^T = -1$$, where $$M\_d = \frac{1}{d}M$$ and $$b\_d = \frac{1}{d}b$$. The modified $$M\_d$$ and $$b\_d$$ do not actually affect the final result as the common $$\frac{1}{d}$$ factor would end up getting cancelled. This reduces the number of regressors by 1. My version of the algorithm using [easyMatrix](https://github.com/fellylanma/easyMatrix) library is as followed:
-1. Populate calibration data with a series of $$m\_x, m\_y$$ magnetometer measurements using quadratic form
+1. Populate calibration data with a series of $$m\_x, m\_y$$ magnetometer measurements in quadratic form
 ```latex
 C = \begin{pmatrix}
 m_{1x}^2 & m_{1x}m_{1y} & m_{1y}^2 & m_{1x} & m_{1y} \\
@@ -145,9 +146,10 @@ m_{nx}^2 & m_{nx}m_{ny} & m_{ny}^2 & m_{nx} & m_{ny}
 2. Perform least-square regression on the data, utilizing LU decomposition
 ```latex
 \begin{aligned}
-P &= C^T C,\quad \mathrlap{b = C^T \begin{pmatrix}-1\\\vdots\\-1\end{pmatrix}_n} \\
+P &= C^T C,\quad b = C^T \begin{pmatrix}-1\\\vdots\\-1\end{pmatrix}_n \\
 LU &= P && \text{LU decomposition from easyMatrix} \\
-Ly &= b,\quad Ux = y && \text{forward/backward substitudion}
+\text{solve }Ly &= b && \text{forward substitudion} \\
+Ux &= y && \text{backward substitudion}
 \end{aligned}
 ```
 3. Compute hard-iron offset $$V$$
@@ -160,21 +162,21 @@ x_2 & x_3
 b_d = \begin{pmatrix}
 x_4 \\ x_5
 \end{pmatrix} \\
-V &= -\frac{1}{2} M_d^{-1}b_d
+V &= -\frac{1}{2} M_d^{-1}b_d && \text{can be solved analytically}
 \end{aligned}
 ```
 4. Compute inverse soft-iron matrix $$W^{-1}$$
 ```latex
 \begin{aligned}
-M' &= (V^T M_d V - 1)^{-1} M_d && \text{equivalent to the $\hat A$ equation above} \\
-LU &= M' && \text{LU decomposition, $L$ always have unit diagonal from easyMatrix} \\
-L^T &= D^{-1}U,\ D = \mathrm{diag}(U) && \text{thus we can find LDL decomposition of $M'$ from diagonal of $U$} \\
+\hat A &= (V^T M_d V - 1)^{-1} M_d && \text{equivalent to the $\hat A$ equation above} \\
+LU &= \hat A && \text{LU decomposition, $L$ always have unit diagonal from easyMatrix} \\
+L^T &= D^{-1}U,\ D = \mathrm{diag}(U) && \text{thus we can find LDL decomposition of $\hat A$ from diagonal of $U$} \\
 LDL^T &= LDD^{-1}U && \text{resulting LDL decomposition} \\
-W^{-1} &= M'^{1/2} = D^{1/2}L^T = D^{-1/2}U && \text{Cheolsky decomposition of $M'$}
+W^{-1} &= \hat A^{1/2} = D^{1/2}L^T = D^{-1/2}U && \text{Cheolsky decomposition of $\hat A$}
 \end{aligned}
 ```
 
-To apply the calibration, simply subtract away the hard-iron offset and multiply the soft-iron matrix
+To apply the calibration, subtract away the hard-iron offset and multiply the soft-iron matrix
 ```latex
 \begin{pmatrix}
 m_x\\m_y
@@ -192,13 +194,21 @@ Surprise! After learning a whole new math construct and running the calibration 
 
 As sad as it was, a new discovery was made anyways. While the magnetic field failed me, the odometry based aiming used for the calibration sequence actually worked really well. With some tuning of wheel distance, I was able to have to turn some multiples of 360° without much deviation from the starting angle. So, as long as the angle of our final approach to the LEGO figure was repeatable, we would be able to get a very precise aiming based on odometry alone.
 
-PID, fixed frequency, weighted sum
+## Robot Firmware
+STM32F401RE was a pretty good microcontroller for robot cars. On top of the relative high clock speed and plenty flash space, its 11 timers was crucial. In the end 9 of the 11 timers were used for quadrature decoding, motor control, servo control, main loop time keeping, and tone generation (for playing music!). In particular, having hardware support for quadrature decoding was indispensable for accurate wheel rotation sensing at high speed. One of the timer was used to keep the main loop running at 1kHz, this way the control system behaviour remains the same as features were added and removed from the firmware.
+
+The high level behaviour of the robot was managed by a state machine, it made it really easy to program predefined sequences (like aiming and shooting) together with the more dynamic line-following stage. I did spend some time to find the right condition to transition from line-following to the aiming sequence. With the 6 sensor inputs, the combination of their variance, mean, and the distance travelled was the most reliable to detect the target pattern. If the threshold was too high, the robot would start following the target before stopping, making the end position inconsistent; if the threshold was too low, there would be false detection mid course. The detection was also sensitive to the speed of the robot, good thing that with encoders its speed could be really consistent regardless of battery voltage.
+
+Each wheel is controlled by their own PID controller. The dynamic system from PWM duty cycle to wheel speed was a simple 1st order system so making a simulation for it seemed overkill. Instead I spent even more time to build a GUI to tune and display the closed-loop response in real time using the UART interface. As extra as it was, it was a pretty useful tool for tuning the PID parameters for the wheel speed controller.
+<center>
+![motor tuner](img/line-follower/motor-tune.png =49%x*)<br/>
+Wheel Speed Controller Tuning Interface
+</center>
+
+The predefined sequences were made of a few different actions. Beside servo actuations for triggering the kicker and latching the catcher, there were turning, moving in an arc, and moving in straight line. These moves all replied on wheel odometry - setting each wheel at some preconfigured speed and stop when each wheel reaches the target encoder counts. Originally I tried achieving the same by running another PID controller on wheel encoder count, but the robot wasn't as straight and snappy compared to just setting them at a constant speed until target is reached.
+
 <center>
 <video preload=metadata controls style="width: 49%"><source src="img/line-follower/follow-tune.mp4">line following control-loop tuning</video><br/>
 </center>
-
-State machine, end detection
-
-Speed control
 
 Result
