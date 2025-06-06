@@ -8,7 +8,7 @@ In the third year of university, we have a design project course that lets us bu
 ![course](img/line-follower/course.png =49%x*)<br/>
 </center>
 
-The performance of the robot is evaluated based on its mass, time to completion, and reliability. After some brain storming and a lot of loophole probing with the TA, we settled on the solution: drive the robot to the center of the course as fast as possible following the line, then kick it straight back to the start where a net would be left behind. A [writeup by my groupmate Josh](https://joshdolgin.github.io/projects.html) has a more complete view on the rules and the design process. This blog will focus on the electrical and firmware aspect of the project.
+The performance of the robot is evaluated based on its mass, time to completion, and reliability. After some brain storming and a lot of loophole probing with the TA, we settled on the solution: drive the robot to the center of the course as fast as possible following the line, then kick it straight back to the start where a net would be left behind. Josh from my group [has a writeup](https://joshdolgin.github.io/projects.html) with more complete rules and design process. This blog will focus on the electrical and firmware aspect of the project.
 
 ## Line Detection
 In order for the robot to follow the line, it must know where the line is. It was known since the beginning that infrared detector does not work well with the red tape used to mark the line. So the traditional infrared sensor used by most line following robot were not suitable for this project.
@@ -207,8 +207,14 @@ Wheel Speed Controller Tuning Interface
 
 The predefined sequences were made of a few different actions. Beside servo actuations for triggering the kicker and latching the catcher, there were turning, moving in an arc, and moving in straight line. These moves all replied on wheel odometry - setting each wheel at some preconfigured speed and stop when each wheel reaches the target encoder counts. Originally I tried achieving the same by running another PID controller on wheel encoder count, but the robot wasn't as straight and snappy compared to just setting them at a constant speed until target is reached.
 
+The line-following controller gets its input from the 6 sensors using a weighted sum. After a lot of tuning (aka changing every parameters randomly until things work), a linear weight of -5, -3, -1, 1, 3, 5 from left to right seems to have worked well. A PID controller acts on this sum as input and produces the desired speed differential between the two wheels. This differential is then added to a configurable base speed to feed into the wheel controllers. Ethan from our group made a really nice jig that lets us tune the controller statically.
+
 <center>
-<video preload=metadata controls style="width: 49%"><source src="img/line-follower/follow-tune.mp4">line following control-loop tuning</video><br/>
+<video preload=metadata controls style="width: 49%"><source src="img/line-follower/follow-tune.mp4">line following control-loop tuning</video>
+Line Following Tuning Jig
 </center>
 
-Result
+## End Result
+<center>
+<iframe width="560" height="315" style="width: 60%" src="https://www.youtube.com/embed/NF9tTPwQtP0?si=hlFXL7TbhcZF0XYc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</center>
