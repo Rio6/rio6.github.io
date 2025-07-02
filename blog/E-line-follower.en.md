@@ -83,7 +83,7 @@ For the final product, I designed a PCB board that consolidates motor driver, ph
 - 2x servo headers
 - Photodiode and led array, amplified with MMBT3904 transistors (which are SMT version of 2N3904 previously tested)
 - Solder pads for motor encoders
-- Serial UART connector compatible wit HC06 Bluetooth module
+- Serial UART connector compatible with HC-06 Bluetooth module
 
 <center>
 ![schematics](img/line-follower/schematics.png =50%x*)
@@ -97,6 +97,7 @@ There were some potentials of mass and space optimization if we incorporated a m
 - Nucleo having a built-in programmer makes development really easy
 - Incorporating an equivalent STM32 microcontroller on the custom PCB would required the same amount of supporting hardware anyways
 - With a 2-deck circuit board structure near the rear of the robot, it shifted the center of mass towards the wheels, which was desirable for both acceleration and turns
+- The school lends us Nucleo dev board for free, so it saved us some money
 
 We could also have cut the unused headers and made the programmer removable on the Nucleo to save more weight, but the dev board was actually borrowed so we didn't modify it in the end.
 
@@ -204,8 +205,6 @@ Each wheel is controlled by their own PID controller. The dynamic system from PW
 ![motor tuner](img/line-follower/motor-tune.png =49%x*)<br/>
 Wheel Speed Controller Tuning Interface
 </center>
-
-The predefined sequences were made of a few different actions. Beside servo actuations for triggering the kicker and latching the catcher, there were turning, moving in an arc, and moving in straight line. These moves all replied on wheel odometry - setting each wheel at some preconfigured speed and stop when each wheel reaches the target encoder counts. Originally I tried achieving the same by running another PID controller on wheel encoder count, but the robot wasn't as straight and snappy compared to just setting them at a constant speed until target is reached.
 
 The line-following controller gets its input from the 6 sensors using a weighted sum. After a lot of tuning (aka changing every parameters randomly until things work), a linear weight of -5, -3, -1, 1, 3, 5 from left to right seems to have worked well. A PID controller acts on this sum as input and produces the desired speed differential between the two wheels. This differential is then added to a configurable base speed to feed into the wheel controllers. Ethan from our group made a really nice jig that lets us tune the controller statically.
 
