@@ -213,7 +213,16 @@ The line-following controller gets its input from the 6 sensors using a weighted
 Line Following Tuning Jig
 </center>
 
+set points
+
 ## End Result
 <center>
 <iframe width="560" height="315" style="width: 60%" src="https://www.youtube.com/embed/NF9tTPwQtP0?si=hlFXL7TbhcZF0XYc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </center>
+
+## Extra: Music
+Apparently I have too much time when working on this project. So one day when I was bored writing code I found [miditones](https://github.com/LenShustek/miditones) that converts a midi file into a simple byte sequence that can be parsed easily into play note, stop, and pause commands. Using the direction pin on the motor driver and a STM32 timer I can embed encoded midi files in the robot and play it. It even uses the servo as percussion!
+<center>
+<iframe width="560" height="315" style="width: 60%" src="https://www.youtube.com/embed/uxvNV-Q-7y4?si=4Ngn-N8OmBdQcWyE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</center>
+Unfortunately the motor and motor driver were not designed to handle rapid back and forth movement, and the large current would trigger the overtemperature protection after a minute. For this I even got a heat sink specifically for the motor drive, which actually did prevent the overtemperture fault, but you can still smell burning when running for too long. Even so, it is 100% worth it to have a musical robot.

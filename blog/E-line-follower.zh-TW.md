@@ -222,3 +222,10 @@ STM32F401RE還滿是合作小車的。除了時脈快空間多外，它還有11�
 <center>
 <iframe width="560" height="315" style="width: 60%" src="https://www.youtube.com/embed/NF9tTPwQtP0?si=hlFXL7TbhcZF0XYc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </center>
+
+## 番外：音樂
+我大概是有天時間太多，找了這個叫[miditones](https://github.com/LenShustek/miditones)的程式可以把MIDI檔轉成位元組，用來表達各個音的開始停止和暫停。再加上馬達驅動的方向腳跟STM32的計時器就可以把多葛MIDI檔編入到軔體裡播放。還可以用伺服馬達打節奏!
+<center>
+<iframe width="560" height="315" style="width: 60%" src="https://www.youtube.com/embed/uxvNV-Q-7y4?si=4Ngn-N8OmBdQcWyE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</center>
+但是有個問題，馬達本身和驅動晶片設計並不是拿來每秒幾千次來回跑的，所以音樂大概演奏一分鐘後就會過熱保護關機。為了這個我特地又買了個散熱片貼在晶片上。雖然跑太久還是會有焦味但是至少不會觸動到過熱保護。讓小車能演奏音樂100%值得。
