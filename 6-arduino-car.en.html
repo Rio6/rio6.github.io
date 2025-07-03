@@ -1,0 +1,38 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">RC Car with Android, Arduino, Wifi P2P</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">RC Car with Android, Arduino, Wifi P2P</h1>
+<h2 id="date">2020-04-07</h2>
+<p>Putting another old project of mine here. This is a remote controlled car using Arduino and Wifi Direct on Android. On the car side, an Android phone forwards the commands it got from the controller to Arduino using serial connection, and returns the image data from its camera to the controller. On the controller side, it displays the images, and uses touch screen to generate the commands. The program on the Arduino parses the commands and moves the wheels accordingly.</p>
+<p>The connection between the Android phones is established by wifi direct. The app can also fall back to use normal wifi connection, so it can still be used on older phones or over the internet (ie., controlling and viewing from the car at home from anywhere in the world). I also made my own protocol to send the commands between the devices to inprove the efficiency.</p>
+<p>&gt; <a href="https://github.com/Rio6/ArduinoCar" rel="noopener noreferrer" target="_blank">Github</a><br>
+&gt; <a href="https://drive.google.com/open?id=1fRrYWeqpyM9GWmR_WWx4t9prx3W_GbB_" rel="noopener noreferrer" target="_blank">Video</a></p>
+<p><img src="img/arduino-car.png" alt="" width="0" height="0" srcset="img/arduino-car.png.webp" loading="lazy"></p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>English</li>
+            <li>
+                <a href="6-arduino-car.zh-TW.html">
+                    繁體中文
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>

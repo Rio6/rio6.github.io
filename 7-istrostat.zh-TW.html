@@ -1,0 +1,40 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">Istrolid 遊戲資訊收集</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">Istrolid 遊戲資訊收集</h1>
+<h2 id="date">2020-03-24</h2>
+<p><a href="http://www.istrolid.com/" rel="noopener noreferrer" target="_blank">Istrolid</a> 這個遊戲我已經玩了有4年了。除了簡單又好玩以外，這遊戲最吸引我的地方就是遊戲本身的可修改性。因為它是用Coffeescript寫的，而且又沒有使用程式碼混淆器，所以使用Electron的除錯台就可以簡簡單單的把自制的外掛加入遊戲。我<a href="https://gist.github.com/Rio6" rel="noopener noreferrer" target="_blank">Gist</a>上大部份都是這遊戲的插件。</p>
+<p>這次我做了個遊戲資訊收集的服務。主要收集了每個玩家在線上的時間跟紀錄他們的輸贏。還有一些其它像是公會統計等功能。</p>
+<p>後端分成了兩個部份，一個用websocket連結到遊戲主伺服並用<a href="https://www.sqlalchemy.org/" rel="noopener noreferrer" target="_blank">SQLAlchemy</a>更新資料庫，另一個用<a href="https://cherrypy.org/" rel="noopener noreferrer" target="_blank">CherryPy</a>提供API跟其他網頁服務。因為兩邊用的是同一個資料庫，所以網頁端在沒流量休息關閉的時候，資料庫裡的遊戲資料還是會一直被更新。</p>
+<p>前端則是<a href="https://getbootstrap.com/" rel="noopener noreferrer" target="_blank">Bootstrap</a>加<a href="https://jquery.com/" rel="noopener noreferrer" target="_blank">JQuery</a>簡單弄，用了<a href="https://www.makotemplates.org/" rel="noopener noreferrer" target="_blank">Mako</a>來把重複的內容放到一起。主要就是HTML寫排版，再用AJAX取得資料讓JQuery把資料放進去。CSS什麼的就丟給Bootstrap了 XD。</p>
+<p>之前對SQL不怎麼熟，只知道怎麼 SELECT * FROM players WHERE name = “Hello"; 這次做這個學了不少東西，像是 GROUP BY, ORDER BY, JOIN ON 等指令。SQL技能升等一級！</p>
+<p>整個專案我<a href="https://github.com/Rio6/IstroStats/" rel="noopener noreferrer" target="_blank">有放在Github上</a>，可以在這裡看到：<a href="http://istrostats.r26.me/" rel="noopener noreferrer" target="_blank">http://istrostats.r26.me/</a></p>
+<p><img src="img/istrostats.png" alt="" width="100%" height="auto" srcset="img/istrostats.png.webp" loading="lazy"></p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>繁體中文</li>
+            <li>
+                <a href="7-istrostat.en.html">
+                    English
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>
