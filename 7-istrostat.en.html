@@ -1,0 +1,40 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">IstroStats – Istrolid Game Data Collector</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">IstroStats – Istrolid Game Data Collector</h1>
+<h2 id="date">2020-03-24</h2>
+<p>I’ve been playing the game <a href="http://www.istrolid.com/" rel="noopener noreferrer" target="_blank">Istrolid</a> for almost 4 years. Other than it’s simple and fun, the most intriguing part of this game is it’s modibility. Since it’s written in Coffeescript, and no code obfuscation was applied, so I can easily add in my own code into the game. In fact, most repos on my <a href="https://gist.github.com/Rio6" rel="noopener noreferrer" target="_blank">Gist</a> are plugins for this game.</p>
+<p>This time, I made a game data collector. It mainly collects the time each players stays online and their match records. There’s also some faction and server informations.</p>
+<p>There are 2 parts in the backend. One uses websocket to connect to game’s root server and updates its database with <a href="https://www.sqlalchemy.org/" rel="noopener noreferrer" target="_blank">SQLAlchemy</a>. Another uses <a href="https://cherrypy.org/" rel="noopener noreferrer" target="_blank">CherryPy</a> to provide API and other web services. Since both parts connects to the same database, I can have the datas updated while the web server is asleep.</p>
+<p>For the frontend, I use <a href="https://getbootstrap.com/" rel="noopener noreferrer" target="_blank">Bootstrap</a> and <a href="https://jquery.com/" rel="noopener noreferrer" target="_blank">JQuery</a> for a simple setup, and <a href="https://www.makotemplates.org/" rel="noopener noreferrer" target="_blank">Mako</a> to reduce duplicate codes. The HTML files contains the layout of the each page, then a script uses AJAX to obtain informations from API, and they get put into the page by JQuery. Bootstrap looks good with its defauilt style sheets, so I don’t have to do the annoying CSS stuff XD.</p>
+<p>Before I wasn’t very famaliar with SQL. All I knew was easy things like SELECT * FROM players WHERE name = “HELLO"; Through this project, I learned more things, like GROUP BY, ORDER BY, JOIN ON. Leveling up my SQL skill!</p>
+<p>I put the whole project on <a href="https://github.com/Rio6/IstroStats/" rel="noopener noreferrer" target="_blank">Github</a>, and the service is currently running here: <a href="http://istrostats.r26.me/" rel="noopener noreferrer" target="_blank">http://istrostats.r26.me/</a></p>
+<p><img src="img/istrostats.png" alt="" width="100%" height="auto" srcset="img/istrostats.png.webp" loading="lazy"></p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>English</li>
+            <li>
+                <a href="7-istrostat.zh-TW.html">
+                    繁體中文
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>

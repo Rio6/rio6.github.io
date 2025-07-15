@@ -1,0 +1,57 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">AstroPi Challenge from ESA</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">AstroPi Challenge from ESA</h1>
+<h2 id="date">2020-07-26</h2>
+<p>A while back, I learned about <a href="http://www.esa.int/Education/AstroPI" rel="noopener noreferrer" target="_blank">AstroPi</a> from a friend. It sounds pretty fun, so I grabbed the robotics club from my school to do it.</p>
+<p>AstroPi is a program from the European Space Agency to let students from highschool design an experiment to run on a RaspberryPi, using accelerometer, magnetometer, gyroscope, temperature, pressure and humidity sensor, and camera. The program would be running on the International Space Station (ISS) for 3 hours, and we get the log it creates back to write some reports.</p>
+<p>ESA's website says top 10 teams would get a reward. But we don't really like nor good at writing reports… space pictures are rewarding enough.</p>
+<p>I came up with the experiment we did. I wanted know how easy it is for a program running in space to crash. Since in the orbit, there's less protection against solar wind and cosmic way provided from Earth's atmosphere and magnetic field, it might cause the RaspberryPi to reset, or have its memory content changed up there.</p>
+<p>The rule says I can only write the program in Python, so I made the program to create a NumPy array, and then create a checksum for it using adler32 algorithm from zlib (adler32 ran faster than other algorithms in hashlib from my tests). The program constantly recalculates the checksum during its execution time to determine if the content of the array has been changed. I eventually made 2 arrays, one filled with 1, the other with 0 to see which state of a bit would be the most volatile.</p>
+<p>At the same time, the program writes the time to a file. This way, if it crashes, we would know by looking at that file. Of course, all the sensor datas are logged as well. Most importantly, it takes pictures. Every minute, the program capture a photo, and it calculates the ISS's position using <a href="https://pypi.org/project/ephem/" rel="noopener noreferrer" target="_blank">Ephem</a>, and writes the position in the GPS tag of the image.</p>
+<p><a href="https://github.com/RoyalBayRobotics/AstroPi" rel="noopener noreferrer" target="_blank">The code is on Github</a></p>
+<p>I submitted the code at the end of April, and got the result in the middle of May. From the log, the program ran on 1st of May from 17:06:14 UTC to 20:06:03 UTC. During that time, it orbited the Earth about 2 times. <a href="https://drive.google.com/file/d/1G37ZwWSXPqa0U6kU40oxZGgMFa1y9MJ8/view?usp=sharing" rel="noopener noreferrer" target="_blank">I made a Google Earth project of it</a>, it can be viewed in Google Earth.</p>
+<p>For our experiment, nothing happened. The program successfully ran for the whole 3 hours. Memory content was not changed. We thought it was the most possible result for our experiment, since the RaspberryPi used was inside an aluminum box, which is inside the ISS. The wall of ISS and the box can shield most of the radiations. Even though the ISS passed through the famous <a href="https://en.wikipedia.org/wiki/South_Atlantic_Anomaly" rel="noopener noreferrer" target="_blank">South Atlantic Anomoly</a> (SAA) twice, it wasn't enough to crash the RaspberryPi.</p>
+<p>Despite that the experiment result was pretty boring, the pictures it got are great. Here are a few:</p>
+<div markdown="1" style="display: inline-block; width: 45%; vertical-align: top"><p></p><center>San Francisco</center>
+<img src="img/astropi/image29.jpg" alt="San Francisco" width="100%" height="auto" srcset="img/astropi/image29.jpg.webp" loading="lazy"><p></p></div>
+<div markdown="1" style="display: inline-block; width: 45%; vertical-align: top"><p></p><center>Los Angeles</center>
+<img src="img/astropi/image30.jpg" alt="Los Angeles" width="100%" height="auto" srcset="img/astropi/image30.jpg.webp" loading="lazy"><p></p></div>
+<div markdown="1" style="display: inline-block; width: 45%; vertical-align: top"><p></p><center>A place called Antofagasta in Chile</center>
+<img src="img/astropi/image50.jpg" alt="Antofagasta" width="100%" height="auto" srcset="img/astropi/image50.jpg.webp" loading="lazy"><p></p></div>
+<div markdown="1" style="display: inline-block; width: 45%; vertical-align: top"><p></p><center>Right above Taiwan</center>
+<img src="img/astropi/image4.jpg" alt="Taiwan" width="100%" height="auto" srcset="img/astropi/image4.jpg.webp" loading="lazy">
+<center>You see nothing because it was at night</center><p></p></div>
+<p><a href="https://drive.google.com/drive/folders/1kBabJehYV8yjgZfQ81lZPUiZPAR5hyWs?usp=sharing" rel="noopener noreferrer" target="_blank">I put all the pictures on Google Drive too</a></p>
+<p>I did find another interesting thing from the magnetometer data. From the graph, we see the detected magnetic field strength changes as the ISS orbits around the Earth. If we compare the time on the graph and the position of ISS, we can see both trough happend when the station was above the SAA mentioned earlier.
+<img src="img/astropi/mag.png" alt="Magnetometer" width="100%" height="auto" srcset="img/astropi/mag.png.webp" loading="lazy"></p>
+<p>Anyways, I think having my code running in outer space is cool, and Earth looks beautiful from space.</p>
+<p>Oh also, the report we did didn't get a reward.</p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>English</li>
+            <li>
+                <a href="8-astropi.zh-TW.html">
+                    繁體中文
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>

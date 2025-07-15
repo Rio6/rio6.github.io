@@ -1,0 +1,60 @@
+<!DOCTYPE html><html><head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <link rel="shortcut icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="style.css">
+        <script src="locale.js"></script>
+
+        <title id="title">4D TicTacToe</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="index.html">Rio's Blog</a></h1>
+        </div>
+        <div id="content"><h1 id="title">4D TicTacToe</h1>
+<h2 id="date">2021-02-02</h2>
+<p><img style="display: none;" src="img/ttt.png" srcset="img/ttt.png.webp" loading="lazy"></p>
+<div style="
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56%;
+">
+    <iframe src="https://csclub.uwaterloo.ca/~r345liu" width="400" height="300" style="
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        border: none;
+    "></iframe>
+</div>
+<p><a href="https://csclub.uwaterloo.ca/~r345liu" rel="noopener noreferrer" target="_blank">Play in fullscreen</a></p>
+<p>Some time ago I was chatting with my calculus instructor, the idea of 4D TicTacToe came up. I know there are some already out there but it's more fun to make one myself.</p>
+<p>I decided to use WebGL to make this because I want to make it easy to play. I also chose Typescript to write it because I've heard people saying it's good (better than Javascript). After using it, it feels not bad. It might even be the first time I'm amazed by compiler errors. For the website script, I output it into a single AMD bundle and load it with <a href="https://github.com/requirejs/almond" rel="noopener noreferrer" target="_blank">Almond</a>. For server it's just Node running on compiled js files. Not too fancy of a setup but I like how I don't need a hundred JavaScript bundlers just to use new syntaxes and bundles.</p>
+<p>The most interesting part about making this project is of course he 4D part. Luckily, WebGL can already do math with 4D matrices (for doing 3D homogeneous coordinate stuff). Although translation and scaling would need additional vectors to present them, all the rotations can be represented with one matrix, which is nice.</p>
+<p>To render a 4D board on a 2D screen, I simply projected it onto the <code>w = 0</code> plane with further points appear smaller, then apply the normal 3D perspective matrix to it so at least the 3D part of the 4D board is easy to see.</p>
+<p>I think the most fun part of 4D is its rotation. It is what tells your brain that it is not looking at a jumbled line in 3D, but a whole extra dimension. Although in addition to rotations around <code>wx</code>, <code>wy</code>, <code>wz</code> planes using mouse, I still kept the 3D rotations around <code>x</code> and <code>y</code> so the game doesn't become too unplayable in 4D mode. The kind of represent the movement of a 3D camera around the projected 4D object.</p>
+<p>I also added views for "slices" of the 4D board. So you can view it as 3 slices of 3D board, or 9 slices of 2D board. These are actually pretty easy to implement. Due to the shapes I'm using for boards and pieces, I can just disable the perspective transformation and filter out which points to render by their position on the board. They certainly makes the game easier to play, but I still like playing in 4D mode to mess with my brain.</p>
+<p>Most game logic of TicTacToe are the same across all dimensions, like one move per turn, can only place on empty block, etc. There is however the problem of checking 3 in a row in 4D. Unlike in 2D, I can't just picture a 4D grid in my head and convert the lines into indices. For one, I'm not big brain enough to think in 4D (4D is infinitely larger than 3D, which is the dimension my brain is in), plus the number of lines in 4D is way more than in the lower dimensions (I still haven't done the math yet, but something like a couple hundreds maybe). After some inspiration from <a href="https://www.youtube.com/watch?v=FwJZa-helig" rel="noopener noreferrer" target="_blank">PBS Infinite Series</a>, I figured I could just loop through all the positions in the board, and get the list of axes that the block is at the end of. For example, for the block at <code>[0, 1, 2, 1]</code>, the axes would be <code>x</code> and <code>-z</code> (<code>x</code> component is at the start (<code>0</code>), <code>z</code> component is at the end (<code>2</code>)). Once I get the list of axes, I can create a list of directions that ends in this block by calculating the power set of the axes (excluding null set). For this example, the result would be <code>[1, 0, 0, 0]</code>, <code>[0, 0, -1, 0]</code>, and <code>[1, 0, -1, 0]</code>. Calculating that in code is surprisingly easy - it's just counting in binary. After all that, I can just check the blocks along these directions and check if any of those directions contain 3 in a row. The process is not the most efficient as it would count some the lines twice, but hey it keeps the code simpler. And it's still pretty fast.</p>
+<p>This game also has a multiplayer mode (because I'm too lazy to write a 4 dimensional AI). I simply maintain a game board object on the server side, and both players would send their inputs to, and receive board state from Websocket. Since the game of TicTacToe uses so little traffic, sending the whole game state on every update is totally doable, and very simple too.</p>
+<p>All in all, I think 4D is my favourite dimension. It's challenging to think about it, but not too hard to calculate. And making TicTacToe in 4D certainly is very fun.</p>
+<p>Code is on Github: <a href="https://github.com/Rio6/4D-TicTacToe" rel="noopener noreferrer" target="_blank">Rio6/4D-TicTacToe</a>.</p></div>
+        <div id="footer">
+            Made by Rio
+        </div>
+        <ul tabindex="0" id="lang-select"><li>English</li>
+            <li>
+                <a href="A-4Dtictactoe.zh-TW.html">
+                    繁體中文
+                </a>
+            </li>
+        </ul>
+    
+
+</body></html>
