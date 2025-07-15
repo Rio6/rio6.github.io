@@ -216,6 +216,7 @@ Line Following Tuning Jig
 set points
 
 ## End Result
+In the end, we successfully completed 3 runs, with the best time of 8.04s and a mass of 178.4g which got us the 1st place without any doubt.
 <center>
 <iframe width="560" height="315" style="width: 60%" src="https://www.youtube.com/embed/NF9tTPwQtP0?si=hlFXL7TbhcZF0XYc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </center>
